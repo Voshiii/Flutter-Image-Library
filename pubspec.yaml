@@ -1,0 +1,37 @@
+name: photo_album
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  # http: ^0.13.6
+  http: ^1.0.0
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.2.3
+  image_picker: ^1.0.7
+  rive: ^0.13.4
+  internet_connection_checker_plus: ^2.7.1
+  image_gallery_saver: ^2.0.3
+  # gallery_saver: ^2.0.3
+  permission_handler: ^11.4.0
+  flutter_dotenv: ^5.2.1
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - riv_assets/fillfolder.riv
+    - riv_assets/emptyfolder.riv
+    - riv_assets/nowifi.riv
+    - .env
