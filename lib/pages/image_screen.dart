@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/empty_folder_anim.dart';
+import 'package:photo_album/components/image_gallery.dart';
 import 'package:photo_album/components/image_viewer.dart';
 import 'package:photo_album/components/loading_anim.dart';
 import 'package:photo_album/components/my_image_pop_up.dart';
@@ -36,12 +37,6 @@ class _ImageScreenState extends State<ImageScreen> {
     });
   }
 
-    // Decode the base64 image string once
-  // Future<Uint8List> _decodeImage(String base64Image) async {
-  //   return base64Decode(base64Image.split(',')[1]);
-  // }
-
-  //UPDATED:
   @override
   void initState() {
     super.initState();
@@ -103,25 +98,38 @@ class _ImageScreenState extends State<ImageScreen> {
               padding: EdgeInsets.only(left: 12, right: 12),
               itemCount: futureImages.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onLongPress: () => {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => MyImagePopUp(
-                        folderName: widget.folderName,
-                        // img: futureImages[index]['data'].split(',')[1],
-                        img: base64Decode(futureImages[index]['data'].split(',')[1]),
-                        imgName: futureImages[index]['name'],
-                      ),
-                      ).then((reload) {
-                        // Reload page after submitting
-                        if(reload == true){
-                          refreshImages();
-                          // setState(() {});
-                        }
-                      })
-                  },
-                  child: ImageViewer(img: base64Decode(futureImages[index]['data'].split(',')[1])),
+                return ClipRRect(
+                  child: GestureDetector(
+                    onLongPress: () => {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => MyImagePopUp(
+                          folderName: widget.folderName,
+                          // img: futureImages[index]['data'].split(',')[1],
+                          img: base64Decode(futureImages[index]['data'].split(',')[1]),
+                          imgName: futureImages[index]['name'],
+                        ),
+                        ).then((reload) {
+                          // Reload page after submitting
+                          if(reload == true){
+                            refreshImages();
+                            // setState(() {});
+                          }
+                        })
+                    },
+                    child: ImageViewer(
+                      img: base64Decode(futureImages[index]['data'].split(',')[1],), 
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyImageGallery(images: futureImages, current_img: index),
+                          ),
+                        );
+                      },
+                    ),
+                      
+                  ),
                 );
               },
             ),

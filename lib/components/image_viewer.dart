@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 
 class ImageViewer extends StatefulWidget {
   final Uint8List img;
-  const ImageViewer({Key? key, required this.img}) : super(key: key);
+  final VoidCallback onTap;
+  ImageViewer({
+    Key? key, 
+    required this.img, 
+    required this.onTap
+  }) : super(key: key);
 
   @override
   _ImageViewerState createState() => _ImageViewerState();
@@ -36,11 +41,17 @@ class _ImageViewerState extends State<ImageViewer> {
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
+      onTap: widget.onTap,
       child: AnimatedScale(
         scale: _scale,
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeOut,
-        child: Image.memory(widget.img),
+        child: Image.memory(
+          widget.img,
+          fit: BoxFit.cover, // crop + scale image to fill space
+          width: double.infinity,
+          height: double.infinity,
+          ),
       ),
     );
   }
