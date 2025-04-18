@@ -1,9 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/folder_button.dart';
 import 'package:photo_album/components/logout_popup.dart';
-import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/components/no_internet.dart';
 import 'package:photo_album/components/pop_up.dart';
 import 'package:photo_album/pages/image_screen.dart';
@@ -20,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
-  // final storage = FlutterSecureStorage();
   String? username = '';
   String? password = '';
   bool hasInternet = true;
@@ -38,6 +36,163 @@ class _HomescreenState extends State<HomeScreen> {
 
 
   Widget _buildImageView() {
+    OverlayEntry? _overlayEntry;
+    Offset _tapPosition = Offset.zero;
+
+      void _showContextMenu(BuildContext context, Offset tapPosition, String folderName, LayerLink layerLink, Offset position, Size size){
+      final screenSize = MediaQuery.of(context).size;
+
+      // Safe margin
+      final popupWidth = 160.0;
+      final popupHeight = 250.0;
+
+      // Clamp the position to keep the popup on-screen
+      double dx = position.dx;
+      double dy = position.dy+130;
+
+      // When popup goes over screen width
+      if (dx + popupWidth > screenSize.width) {
+        dx -= 90;
+      }
+
+      // When popup goes over screen width (on the left)
+      if(dx - popupWidth < 0){
+        dx += 20;
+      }
+
+      // When popup goes over screen height (bottom)
+      if (dy + popupHeight > screenSize.height) {
+        dy -= 380;
+      }
+
+      final AnimationController controller = AnimationController(
+        vsync: Navigator.of(context),
+        duration: Duration(milliseconds: 200),
+      );
+      final Animation<double> scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
+
+      _overlayEntry = OverlayEntry(
+        builder: (context) {
+          return Stack(
+            children: [
+              // Background blur
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                  child: Container(color: Colors.black.withOpacity(0.3)),
+                ),
+              ),
+
+              // Tap anywhere to dismiss
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () {
+                    controller.dispose();
+                    _overlayEntry?.remove();
+                  },
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+
+              // Bring tapped widget to front (not blurred)
+              CompositedTransformFollower(
+                link: layerLink,
+                showWhenUnlinked: false,
+                targetAnchor: Alignment.topLeft,
+                followerAnchor: Alignment.topLeft,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SizedBox(
+                      width: 120,
+                      height: 120,
+                      child: MyFolderButton(
+                        text: folderName,
+                        backgroundColor: Color.fromARGB(0, 0, 0, 0),
+                        onTap: () {
+                          controller.dispose();
+                          _overlayEntry?.remove();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImageScreen(folderName: folderName),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+
+              // Popup
+              Positioned(
+                left: dx + size.width / 2 - 80,
+                top: dy,
+                child: ScaleTransition(
+                  scale: scale,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      width: popupWidth + 70,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            title: Row(children: [
+                              Text("Get info"),
+                              Spacer(),
+                              Icon(Icons.info_outline)
+                            ],)
+                          ),
+                          Divider(height: 1, thickness: 1, color: Colors.grey,),
+                          ListTile(
+                            title: Row(children: [
+                              Text("Rename"),
+                              Spacer(),
+                              Icon(Icons.drive_file_rename_outline)
+                            ],)
+                          ),
+                          Divider(height: 1, thickness: 1, color: Colors.grey,),
+                          ListTile(
+                            title: Row(children: [
+                              Text("Favorite"),
+                              Spacer(),
+                              Icon(Icons.star_border_outlined)
+                            ],)
+                          ),
+                          Divider(height: 1, thickness: 1, color: Colors.grey,),
+                          ListTile(
+                            title: Row(children: [
+                              Text("Delete",
+                              style: TextStyle(color: Colors.red)),
+                              Spacer(),
+                              Icon(Icons.delete, color: Colors.red,)
+                            ],)
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      Overlay.of(context).insert(_overlayEntry!);
+      controller.forward();
+    }
+
+
     return StreamBuilder<List<dynamic>>(
       stream: _authService.getFolders(context),
       builder: (context, snapshot) {
@@ -66,52 +221,63 @@ class _HomescreenState extends State<HomeScreen> {
           );
         } 
         else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          // return SingleChildScrollView(
-          //   physics: const AlwaysScrollableScrollPhysics(),
-          //   child: const Center(child: Text("No folders found")),
-          // );
           return const Center(child: Text("No folders found")); // Handle empty data
         }
 
-        // Display the data in a GridView
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // Number of items per row
-            crossAxisSpacing: 12, // Space between columns
-            mainAxisSpacing: 12, // Space between rows
-          ),
-          padding: EdgeInsets.only(left: 12, right: 12),
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-            return MyFolderButton(text: snapshot.data![index], onTap: () => {
-              Navigator.push(
-                context,
-                MaterialPageRoute( // Switch Screens
-                  builder: (context) => ImageScreen(folderName: snapshot.data![index]),
-                ),
-              )},
-              onLongPress: () => {
-                showDialog(
-                context: context,
-                builder: (BuildContext context) => MyDeleteDialog(
-                  folderName: snapshot.data![index], 
-                  text: "Are you sure you want to delete the folder ",
-                  img: "",
-                  ),
-                ).then((reload) {
-                  // Reload page after submitting
-                  if(reload == true){
-                    // Reload page after submitting
-                    setState(() {});
-                  }
-                })
-              }
-            );
-          },
+        return Stack(
+          children: [
+            GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final folderName = snapshot.data![index];
+
+                return Builder(
+                  builder: (context) {
+                    final layerLink = LayerLink();
+                    final key = GlobalKey();
+
+                    return GestureDetector(
+                      key: key,
+                      onTapDown: (details) => _tapPosition = details.globalPosition,
+                      onLongPress: () {
+                        final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+                        final position = renderBox.localToGlobal(Offset.zero);
+                        final size = renderBox.size;
+                        //final renderBox = key.currentContext!.findR
+                        //enderObject() as RenderBox;
+                        _showContextMenu(context, _tapPosition, folderName, layerLink, position, size);
+                      },
+                      child: CompositedTransformTarget(
+                        link: layerLink,
+                        child: MyFolderButton(
+                          text: folderName,
+                          backgroundColor: Color.fromARGB(255, 231, 231, 231),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ImageScreen(folderName: folderName),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         );
-      },
-    );
+      });
   }
+  
 
   @override
   Widget build(BuildContext context) {

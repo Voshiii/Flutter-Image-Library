@@ -1,26 +1,23 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-// import 'package:photo_album/components/my_delete_popup.dart';
 
 class MyFolderButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final Color backgroundColor;
 
 
   const MyFolderButton({
     super.key,
     required this.text,
     required this.onTap,
-    required this.onLongPress,
+    required this.backgroundColor,
     });
 
-  // bool _isLongPressed = false;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      onLongPress: onLongPress,
-
       child: Material(
 
         child: InkWell(
@@ -33,7 +30,8 @@ class MyFolderButton extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               // color: Theme.of(context).colorScheme.secondary,
-              color: const Color.fromARGB(255, 231, 231, 231),
+              // color: const Color.fromARGB(255, 231, 231, 231),
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(

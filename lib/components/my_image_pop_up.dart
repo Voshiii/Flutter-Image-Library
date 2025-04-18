@@ -47,7 +47,7 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
               // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: ()  {
-                  // Code to delete file
+                  // Code to delete image
                   _authService.deleteImage(widget.folderName, widget.imgName).then((_) {
                     Navigator.of(context).pop(true);
                   });
@@ -69,6 +69,8 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
               // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: () async {
+                  // To-do: put in function
+
 
                   // Uint8List bytes = base64Decode(widget.img);
                   Uint8List bytes = widget.img;

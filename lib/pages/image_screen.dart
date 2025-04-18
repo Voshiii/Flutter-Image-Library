@@ -3,7 +3,6 @@ import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/empty_folder_anim.dart';
 import 'package:photo_album/components/image_viewer.dart';
 import 'package:photo_album/components/loading_anim.dart';
-// import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/components/my_image_pop_up.dart';
 import 'dart:convert';
 
@@ -105,9 +104,6 @@ class _ImageScreenState extends State<ImageScreen> {
               itemCount: futureImages.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  // onTapDown: _onTapDown,
-                  // onTapUp: _onTapUp,
-                  // onTapCancel: _onTapCancel,
                   onLongPress: () => {
                     showDialog(
                       context: context,
@@ -125,26 +121,7 @@ class _ImageScreenState extends State<ImageScreen> {
                         }
                       })
                   },
-                  child: ImageViewer(imageData: base64Decode(futureImages[index]['data'].split(',')[1])),
-                  // FIX FLICKERING
-                  // child: FutureBuilder<Uint8List>(
-                  //   future: _decodeImage(futureImages[index]['data']), // Only decode once
-                  //   builder: (context, snapshot) {
-                  //     if (snapshot.connectionState == ConnectionState.waiting) {
-                  //       return CircularProgressIndicator(); // Show loading spinner while waiting
-                  //     } else if (snapshot.hasError) {
-                  //       return Icon(Icons.error); // Show error icon if something goes wrong
-                  //     } else if (snapshot.hasData) {
-                  //       // return AnimatedScale(
-                  //       //   scale: _scale,
-                  //       //   duration: const Duration(milliseconds: 100),
-                  //       //   child: Image.memory(snapshot.data!),
-                  //       // );
-                  //       return ImageViewer(imageData: snapshot.data!);
-                  //     }
-                  //     return SizedBox(); // In case of an unexpected error
-                  //   },
-                  // )
+                  child: ImageViewer(img: base64Decode(futureImages[index]['data'].split(',')[1])),
                 );
               },
             ),

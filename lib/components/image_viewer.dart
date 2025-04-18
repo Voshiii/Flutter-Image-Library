@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class ImageViewer extends StatefulWidget {
-  final Uint8List imageData;
-  const ImageViewer({Key? key, required this.imageData}) : super(key: key);
+  final Uint8List img;
+  const ImageViewer({Key? key, required this.img}) : super(key: key);
 
   @override
   _ImageViewerState createState() => _ImageViewerState();
@@ -40,7 +40,7 @@ class _ImageViewerState extends State<ImageViewer> {
         scale: _scale,
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeOut,
-        child: Image.memory(widget.imageData),
+        child: Image.memory(widget.img),
       ),
     );
   }
