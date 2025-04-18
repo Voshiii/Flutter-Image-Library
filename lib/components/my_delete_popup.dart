@@ -5,13 +5,9 @@ import 'package:photo_album/auth/auth.dart';
 
 class MyDeleteDialog extends StatefulWidget {
   final String folderName;
-  final String text;
-  final String img;
 
   const MyDeleteDialog({
     required this.folderName,
-    required this.text,
-    required this.img,
   }); // Constructor
 
   @override
@@ -32,7 +28,7 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: widget.text,
+                    text: "Are you sure you want to delete: ",
                     style: TextStyle(fontWeight: FontWeight.normal), // Normal style
                   ),
                   TextSpan(
@@ -86,7 +82,6 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
                 color: const Color.fromARGB(255, 214, 214, 214),
                 borderRadius: BorderRadius.circular(10),
               ),
-              // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: () {
                   Navigator.pop(context);

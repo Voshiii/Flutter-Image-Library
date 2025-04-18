@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/folder_button.dart';
 import 'package:photo_album/components/logout_popup.dart';
+import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/components/no_internet.dart';
 import 'package:photo_album/components/pop_up.dart';
 import 'package:photo_album/pages/image_screen.dart';
@@ -19,8 +20,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
-  String? username = '';
-  String? password = '';
   bool hasInternet = true;
 
   @override
@@ -29,7 +28,7 @@ class _HomescreenState extends State<HomeScreen> {
     Future.delayed(Duration(milliseconds: 2000));
   }
 
-  Future<void> refreshImages() async {
+  Future<void> refreshFolders() async {
     setState(() {});
     hasInternet = await InternetConnection().hasInternetAccess;
   }
@@ -175,7 +174,19 @@ class _HomescreenState extends State<HomeScreen> {
                               style: TextStyle(color: Colors.red)),
                               Spacer(),
                               Icon(Icons.delete, color: Colors.red,)
-                            ],)
+                            ],),
+                            onTap: () async {
+                              controller.dispose();
+                              _overlayEntry?.remove();
+                              final result = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => MyDeleteDialog(folderName: folderName),
+                              );
+
+                              if (result == true) {
+                                refreshFolders();
+                              }
+                            },
                           )
                         ],
                       ),
@@ -249,8 +260,7 @@ class _HomescreenState extends State<HomeScreen> {
                         final renderBox = key.currentContext!.findRenderObject() as RenderBox;
                         final position = renderBox.localToGlobal(Offset.zero);
                         final size = renderBox.size;
-                        //final renderBox = key.currentContext!.findR
-                        //enderObject() as RenderBox;
+
                         _showContextMenu(context, _tapPosition, folderName, layerLink, position, size);
                       },
                       child: CompositedTransformTarget(
@@ -315,7 +325,7 @@ class _HomescreenState extends State<HomeScreen> {
         ],
       ),
       body: RefreshIndicator( 
-        onRefresh: refreshImages,
+        onRefresh: refreshFolders,
         child: _buildImageView()
       ),
     );
