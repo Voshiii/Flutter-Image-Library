@@ -28,12 +28,16 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: "Are you sure you want to delete: ",
+                    text: "Are you sure you want to delete folder ",
                     style: TextStyle(fontWeight: FontWeight.normal), // Normal style
                   ),
                   TextSpan(
                     text: widget.folderName,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22,), // Bold style
+                  ),
+                  TextSpan(
+                    text: "?",
+                    style: TextStyle(fontWeight: FontWeight.normal), // Normal style
                   ),
                 ],
               ),),

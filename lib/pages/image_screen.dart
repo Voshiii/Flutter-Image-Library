@@ -7,7 +7,7 @@ import 'package:photo_album/components/loading_anim.dart';
 import 'package:photo_album/components/my_image_pop_up.dart';
 import 'dart:convert';
 
-import 'package:photo_album/components/pop_up_text.dart';
+import 'package:photo_album/components/image_selector.dart';
 
 class ImageScreen extends StatefulWidget {
   final String folderName;

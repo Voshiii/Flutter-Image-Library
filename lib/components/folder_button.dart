@@ -40,7 +40,7 @@ class MyFolderButton extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.folder,
-                    size: 50,
+                    size: 65,
                     color: Colors.blue,
                   ),
                   Text(text)

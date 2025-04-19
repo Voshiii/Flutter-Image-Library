@@ -1,20 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-// import 'package:photo_album/components/text_field.dart';
 
-class PopUp extends StatelessWidget {
-  final String title;
-  final String content;
-
+class PopUpAddFolder extends StatelessWidget {
   final TextEditingController _textController = TextEditingController();
 
   final AuthService _authService = AuthService();
   
-  PopUp({
+  PopUpAddFolder({
     super.key,
-    required this.title,
-    required this.content,
   });
 
   @override
@@ -22,17 +16,17 @@ class PopUp extends StatelessWidget {
     return 
       CupertinoAlertDialog(
       title: Text(
-        title,
+        "Folder name",
         style: TextStyle(fontSize: 22),
       ),
       content: SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              content,
+              "Please enter new folder name",
               style: TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 10), // Add spacing
+            SizedBox(height: 10),
             CupertinoTextField(
               controller: _textController,
               placeholder: "Folder name",

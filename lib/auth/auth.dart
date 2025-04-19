@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:photo_album/pages/homescreen.dart';
+import 'package:photo_album/pages/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {

@@ -5,8 +5,9 @@ import 'package:photo_album/components/folder_button.dart';
 import 'package:photo_album/components/logout_popup.dart';
 import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/components/no_internet.dart';
-import 'package:photo_album/components/pop_up.dart';
+import 'package:photo_album/components/pop_up_add_folder.dart';
 import 'package:photo_album/pages/image_screen.dart';
+import 'package:photo_album/pages/settings_screen.dart';
 import 'package:rive/rive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
@@ -300,7 +301,7 @@ class _HomescreenState extends State<HomeScreen> {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (BuildContext context) => PopUp(title: "Folder name", content: "Please enter new folder name"),
+                builder: (BuildContext context) => PopUpAddFolder(),
               ).then((reload) {
                 if(reload == true){
                   // Reload page after submitting
@@ -321,7 +322,19 @@ class _HomescreenState extends State<HomeScreen> {
                 }
               })
             }, 
-            icon: Icon(Icons.logout))
+            icon: Icon(Icons.logout)
+          ),
+          IconButton(
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MySettingsPage(),
+                ),
+              )
+            }, 
+            icon: Icon(Icons.settings)
+          ),
         ],
       ),
       body: RefreshIndicator( 

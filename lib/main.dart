@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/pages/homescreen.dart';
+import 'package:photo_album/pages/home_screen.dart';
 import 'package:photo_album/pages/login.dart';
 import 'package:photo_album/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
