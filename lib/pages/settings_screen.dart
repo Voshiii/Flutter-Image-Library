@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_album/components/logout_popup.dart';
 
 
 class MySettingsPage extends StatelessWidget {
@@ -46,7 +47,12 @@ class MySettingsPage extends StatelessWidget {
                 ),
               ),
             trailing: Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => LogoutPopup(),
+              );
+            },
           ),
         ],
       ),
