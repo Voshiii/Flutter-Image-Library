@@ -36,7 +36,7 @@ void showContextMenu(BuildContext context,
 
   // When popup goes over screen height (bottom)
   if (dy + popupHeight > screenSize.height) {
-    dy -= 380;
+    dy -= 430;
   }
 
   final AnimationController controller = AnimationController(
@@ -83,7 +83,7 @@ void showContextMenu(BuildContext context,
                   height: 120,
                   child: MyFolderButton(
                     folderName: data["name"],
-                    backgroundColor: Color.fromARGB(0, 0, 0, 0),
+                    backgroundColor: Colors.black.withOpacity(0.2),
                     data: data,
                     onTap: () {
                       controller.dispose();
@@ -113,13 +113,48 @@ void showContextMenu(BuildContext context,
                 child: Container(
                   width: popupWidth + 70,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color.fromARGB(197, 255, 255, 255),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      SizedBox(height: 5,),
+                      ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                          Column(
+                            children: [
+                              Icon(Icons.folder_copy),
+                              Text(
+                                "Copy",
+                                style: TextStyle(fontSize: 10),
+                              )
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Icon(Icons.ios_share),
+                              Text(
+                                "Share",
+                                style: TextStyle(fontSize: 10),
+                              )
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Icon(Icons.drive_file_move),
+                              Text(
+                                "Move",
+                                style: TextStyle(fontSize: 10),
+                              )
+                            ],
+                          ),
+                        ],),
+                      ),
+                      Divider(height: 1, thickness: 1, color: Colors.grey,),
                       ListTile(
                         title: Row(children: [
                           Text("Get info"),
