@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:photo_album/components/folder_button.dart';
 import 'package:photo_album/components/info_modal.dart';
 import 'package:photo_album/components/my_delete_popup.dart';
+import 'package:photo_album/components/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
 
 void showContextMenu(BuildContext context, 
-    String folderName, 
+    String folderName, // REMOVE
     LayerLink layerLink, 
     Offset position, 
     Size size, 
@@ -138,7 +139,20 @@ void showContextMenu(BuildContext context,
                           Text("Rename"),
                           Spacer(),
                           Icon(Icons.drive_file_rename_outline)
-                        ],)
+                        ],),
+                        onTap: () async {
+                          controller.dispose();
+                          _overlayEntry?.remove();
+                          
+                          final result = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => PopUpRenameFolder(oldFolderName: data["name"]),
+                          );
+
+                          if (result == true) {
+                            await onRefresh?.call();
+                          }
+                        },
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
                       ListTile(

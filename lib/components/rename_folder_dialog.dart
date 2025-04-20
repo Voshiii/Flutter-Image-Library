@@ -2,34 +2,48 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 
-class PopUpAddFolder extends StatelessWidget {
+class PopUpRenameFolder extends StatefulWidget {
+  final String oldFolderName;
+
+  PopUpRenameFolder({
+    super.key,
+    required this.oldFolderName,
+  });
+
+  @override
+  State<PopUpRenameFolder> createState() => _PopUpRenameFolderState();
+}
+
+class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
   final TextEditingController _textController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _textController.text = widget.oldFolderName;
+  }
+
   final AuthService _authService = AuthService();
-  
-  PopUpAddFolder({
-    super.key,
-  });
 
   @override
   Widget build(BuildContext context) {
     return 
       CupertinoAlertDialog(
       title: Text(
-        "Folder name",
+        "Rename folder",
         style: TextStyle(fontSize: 22),
       ),
       content: SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              "Please enter new folder name",
+              "Please enter new folder name for ${widget.oldFolderName}",
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             CupertinoTextField(
               controller: _textController,
-              placeholder: "Folder name",
+              placeholder: "New folder name",
             )
           ],
         ),
@@ -41,7 +55,7 @@ class PopUpAddFolder extends StatelessWidget {
             style: TextStyle(color: Colors.blue),
           ),
           onPressed: () => {
-            _authService.addFolder(_textController.text),
+            _authService.renameFolder(widget.oldFolderName, _textController.text),
             Navigator.of(context).pop(true),
           },
         ),
@@ -58,8 +72,4 @@ class PopUpAddFolder extends StatelessWidget {
 
     );
   }
-
-  
-
-  
 }

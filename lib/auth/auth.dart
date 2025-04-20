@@ -132,6 +132,33 @@ class AuthService {
     }
   }
 
+  Future<bool> renameFolder(String oldFolderName, String newFolderName) async {
+    String? username = await getUsername();
+    String? password = await getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    
+    // Send a PUT request
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': basicAuth,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'oldFolderName': oldFolderName,
+        'newFolderName': newFolderName,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
   Future<List<dynamic>> fetchImages(String folderName) async {
     String? username = await getUsername();
     String? password = await getPassword();
@@ -207,8 +234,8 @@ class AuthService {
       // Attach the image file
       request.files.add(
         await http.MultipartFile.fromPath(
-          'file', // Name of the field in the server (e.g., req.file)
-          image!.path, // Use the path of the selected image
+          'file',
+          image!.path,
         ),
       );
 

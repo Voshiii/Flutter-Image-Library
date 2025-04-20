@@ -65,7 +65,16 @@ class _HomescreenState extends State<HomeScreen> {
           );
         } 
         else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No folders found")); // Handle empty data
+          //return const Center(child: Text("No folders found")); // Handle empty data
+          // To-do: Add padding to center
+          return Center(
+            child: Column(
+              children:[ SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Text("No folders found"),
+              ),]
+            ),
+          );
         }
 
         return Stack(
