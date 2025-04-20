@@ -13,9 +13,23 @@ class MySettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
+          // Thought: Will I keep this?
+          // ListTile(
+          //   title: Text(
+          //     'Recently Deleted',
+          //       style: TextStyle(
+          //         fontWeight: FontWeight.bold,
+          //         fontSize: 19
+          //       ),
+          //     ),
+          //   trailing: Icon(Icons.chevron_right),
+          //   onTap: () {},
+          // ),
+          Divider(height: 1, thickness: 1.5, color: Colors.grey,),
           ListTile(
+            tileColor: Theme.of(context).colorScheme.secondary,
             title: Text(
-              'Recently Deleted',
+              'Favorites (NOT IMPLEMENTED)',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 19
@@ -25,9 +39,11 @@ class MySettingsPage extends StatelessWidget {
             onTap: () {},
           ),
 
+          Divider(height: 1, thickness: 1.5, color: Colors.grey,),
           ListTile(
+            tileColor: Theme.of(context).colorScheme.secondary,
             title: Text(
-              'Favorites',
+              'Theme (NOT IMPLEMENTED)',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 19
@@ -37,7 +53,10 @@ class MySettingsPage extends StatelessWidget {
             onTap: () {},
           ),
 
+          Divider(height: 1, thickness: 1.5, color: Colors.grey,),
+
           ListTile(
+            tileColor: Theme.of(context).colorScheme.secondary,
             title: Text(
               'Logout',
                 style: TextStyle(
@@ -54,6 +73,7 @@ class MySettingsPage extends StatelessWidget {
               );
             },
           ),
+          Divider(height: 1, thickness: 1.5, color: Colors.grey,),
         ],
       ),
     );

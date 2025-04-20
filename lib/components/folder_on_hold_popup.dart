@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/folder_button.dart';
+import 'package:photo_album/components/info_modal.dart';
 import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/pages/image_screen.dart';
 
@@ -10,7 +11,8 @@ void showContextMenu(BuildContext context,
     Offset position, 
     Size size, 
     OverlayEntry? _overlayEntry,
-    Future<void> Function()? onRefresh
+    Future<void> Function()? onRefresh,
+    dynamic data
   ){
   final screenSize = MediaQuery.of(context).size;
 
@@ -80,8 +82,9 @@ void showContextMenu(BuildContext context,
                   width: 120,
                   height: 120,
                   child: MyFolderButton(
-                    text: folderName,
+                    folderName: folderName,
                     backgroundColor: Color.fromARGB(0, 0, 0, 0),
+                    data: data,
                     onTap: () {
                       controller.dispose();
                       _overlayEntry?.remove();
@@ -122,7 +125,12 @@ void showContextMenu(BuildContext context,
                           Text("Get info"),
                           Spacer(),
                           Icon(Icons.info_outline)
-                        ],)
+                        ],),
+                        onTap: () {
+                          controller.dispose();
+                          _overlayEntry?.remove();
+                          showInfoModal(context, data);
+                        },
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
                       ListTile(

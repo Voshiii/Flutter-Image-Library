@@ -2,16 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class MyFolderButton extends StatelessWidget {
-  final String text;
+  final String folderName;
   final VoidCallback onTap;
   final Color backgroundColor;
-
+  final dynamic data;
 
   const MyFolderButton({
     super.key,
-    required this.text,
+    required this.folderName,
     required this.onTap,
     required this.backgroundColor,
+    required this.data,
     });
 
   @override
@@ -43,7 +44,14 @@ class MyFolderButton extends StatelessWidget {
                     size: 65,
                     color: Colors.blue,
                   ),
-                  Text(text)
+                  Text(data["name"]),
+                  Text(
+                    'Items: ${data["itemCount"].toString()}',
+                    style: TextStyle(
+                      color: const Color.fromARGB(216, 116, 116, 116),
+                      fontSize: 12
+                    ),
+                  ),
                 ],  
               ),
             ),

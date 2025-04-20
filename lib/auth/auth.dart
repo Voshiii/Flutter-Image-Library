@@ -90,7 +90,8 @@ class AuthService {
   );
 
 
-  Stream<List<String>> getFolders(BuildContext context) async* {
+  // Stream<List<String>> getFolders(BuildContext context) async* {
+  Stream<List<dynamic>> getFolders(BuildContext context) async* {
     String? username = await getUsername();
     String? password = await getPassword();
     Uri url = Uri.parse('$baseUrl/uploads');
@@ -108,11 +109,16 @@ class AuthService {
       
       if (response.statusCode == 200) {
         // Parse the response
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        List<String> folders = List<String>.from(data['folders']);
+        // print(response.body);
+        // final Map<String, dynamic> data = jsonDecode(response.body);
+        final List<dynamic> data = jsonDecode(response.body)["folders"];
+        // print(data[0]);
+        // List<String> folders = List<String>.from(data['folders']);
         
         // Yield the folders list
-        yield folders;
+        // print(folders);
+        // yield folders;
+        yield data;
       } 
       else {
         print("Error occured while trying to fetch folders!");

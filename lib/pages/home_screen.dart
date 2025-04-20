@@ -79,7 +79,7 @@ class _HomescreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12),
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                final folderName = snapshot.data![index];
+                final folderName = snapshot.data![index]["name"];
 
                 return Builder(
                   builder: (context) {
@@ -93,12 +93,12 @@ class _HomescreenState extends State<HomeScreen> {
                         final position = renderBox.localToGlobal(Offset.zero);
                         final size = renderBox.size;
 
-                        showContextMenu(context, folderName, layerLink, position, size, overlayEntry, refreshFolders);
+                        showContextMenu(context, folderName, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index]);
                       },
                       child: CompositedTransformTarget(
                         link: layerLink,
                         child: MyFolderButton(
-                          text: folderName,
+                          folderName: folderName,
                           backgroundColor: Color.fromARGB(255, 231, 231, 231),
                           onTap: () {
                             Navigator.push(
@@ -108,6 +108,7 @@ class _HomescreenState extends State<HomeScreen> {
                               ),
                             );
                           },
+                          data: snapshot.data![index]
                         ),
                       ),
                     );
