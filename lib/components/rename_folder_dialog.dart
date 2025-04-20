@@ -54,9 +54,9 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
             "Ok",
             style: TextStyle(color: Colors.blue),
           ),
-          onPressed: () => {
-            _authService.renameFolder(widget.oldFolderName, _textController.text),
-            Navigator.of(context).pop(true),
+          onPressed: () async {
+            final bool result = await _authService.renameFolder(widget.oldFolderName, _textController.text);
+            Navigator.of(context).pop(result);
           },
         ),
         CupertinoDialogAction(

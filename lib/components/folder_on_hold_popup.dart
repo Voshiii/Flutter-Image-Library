@@ -7,7 +7,6 @@ import 'package:photo_album/components/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
 
 void showContextMenu(BuildContext context, 
-    String folderName, // REMOVE
     LayerLink layerLink, 
     Offset position, 
     Size size, 
@@ -61,8 +60,8 @@ void showContextMenu(BuildContext context,
           // Tap anywhere to dismiss
           Positioned.fill(
             child: GestureDetector(
-              onTap: () {
-                controller.dispose();
+              onTap: () async {
+                await controller.reverse();
                 _overlayEntry?.remove();
               },
               child: Container(color: Colors.transparent),
@@ -83,7 +82,7 @@ void showContextMenu(BuildContext context,
                   width: 120,
                   height: 120,
                   child: MyFolderButton(
-                    folderName: folderName,
+                    folderName: data["name"],
                     backgroundColor: Color.fromARGB(0, 0, 0, 0),
                     data: data,
                     onTap: () {
@@ -92,7 +91,7 @@ void showContextMenu(BuildContext context,
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ImageScreen(folderName: folderName),
+                          builder: (context) => ImageScreen(folderName: data["name"]),
                         ),
                       );
                     },
@@ -127,8 +126,8 @@ void showContextMenu(BuildContext context,
                           Spacer(),
                           Icon(Icons.info_outline)
                         ],),
-                        onTap: () {
-                          controller.dispose();
+                        onTap: () async {
+                          await controller.reverse();
                           _overlayEntry?.remove();
                           showInfoModal(context, data);
                         },
@@ -141,7 +140,7 @@ void showContextMenu(BuildContext context,
                           Icon(Icons.drive_file_rename_outline)
                         ],),
                         onTap: () async {
-                          controller.dispose();
+                          await controller.reverse();
                           _overlayEntry?.remove();
                           
                           final result = await showDialog<bool>(
@@ -152,6 +151,8 @@ void showContextMenu(BuildContext context,
                           if (result == true) {
                             await onRefresh?.call();
                           }
+                          // To-do: Show popup when failed
+
                         },
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
@@ -171,11 +172,11 @@ void showContextMenu(BuildContext context,
                           Icon(Icons.delete, color: Colors.red,)
                         ],),
                         onTap: () async {
-                          controller.dispose();
+                          await controller.reverse();
                           _overlayEntry?.remove();
                           final result = await showDialog<bool>(
                             context: context,
-                            builder: (context) => MyDeleteDialog(folderName: folderName),
+                            builder: (context) => MyDeleteDialog(folderName: data["name"]),
                           );
 
                           if (result == true) {

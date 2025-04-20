@@ -102,7 +102,7 @@ class _HomescreenState extends State<HomeScreen> {
                         final position = renderBox.localToGlobal(Offset.zero);
                         final size = renderBox.size;
 
-                        showContextMenu(context, folderName, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index]);
+                        showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index]);
                       },
                       child: CompositedTransformTarget(
                         link: layerLink,
