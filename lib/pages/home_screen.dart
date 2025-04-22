@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/folder_button.dart';
@@ -65,15 +64,23 @@ class _HomescreenState extends State<HomeScreen> {
           );
         } 
         else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          //return const Center(child: Text("No folders found")); // Handle empty data
-          // To-do: Add padding to center
-          return Center(
-            child: Column(
-              children:[ SingleChildScrollView(
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Text("No folders found"),
-              ),]
-            ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Center(child: Text("No folders found!")),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           );
         }
 
