@@ -76,63 +76,71 @@ class _ImageScreenState extends State<ImageScreen> {
       ),
       body: RefreshIndicator( 
         onRefresh: refreshImages,
-        child: _isLoading
-        ? Center(
-            child: MyLoadAnimation(),
-          )
-        : futureImages.isEmpty
-          ? Center(child: 
-            ListView(
-              children: [
-                MyEmptyFolderAnim(),
-                Center(child: Text("Couldn't find any images..."))
-              ],
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 400),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: _isLoading
+            ? 
+            Center(
+              key: ValueKey('loading'),
+              child: MyLoadAnimation(),
             )
-          )
-          : GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              padding: EdgeInsets.only(left: 12, right: 12),
-              itemCount: futureImages.length,
-              itemBuilder: (context, index) {
-                return ClipRRect(
-                  child: GestureDetector(
-                    onLongPress: () => {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) => MyImagePopUp(
-                          folderName: widget.folderName,
-                          // img: futureImages[index]['data'].split(',')[1],
-                          img: base64Decode(futureImages[index]['data'].split(',')[1]),
-                          imgName: futureImages[index]['name'],
-                        ),
-                        ).then((reload) {
-                          // Reload page after submitting
-                          if(reload == true){
-                            refreshImages();
-                            // setState(() {});
-                          }
-                        })
-                    },
-                    child: ImageViewer(
-                      img: base64Decode(futureImages[index]['data'].split(',')[1],), 
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MyImageGallery(images: futureImages, current_img: index),
-                          ),
-                        );
-                      },
-                    ),
-                      
+            : futureImages.isEmpty
+              ? Center(child: 
+                ListView(
+                  key: ValueKey('empty'),
+                  children: [
+                    MyEmptyFolderAnim(),
+                    Center(child: Text("Couldn't find any images..."))
+                  ],
+                )
+              )
+              : GridView.builder(
+                  key: ValueKey('grid'),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
-                );
-              },
-            ),
+                  padding: EdgeInsets.only(left: 12, right: 12),
+                  itemCount: futureImages.length,
+                  itemBuilder: (context, index) {
+                    return ClipRRect(
+                      child: GestureDetector(
+                        onLongPress: () => {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => MyImagePopUp(
+                              folderName: widget.folderName,
+                              img: base64Decode(futureImages[index]['data'].split(',')[1]),
+                              imgName: futureImages[index]['name'],
+                            ),
+                            ).then((reload) {
+                              // Reload page after submitting
+                              if(reload == true){
+                                refreshImages();
+                                // setState(() {});
+                              }
+                            })
+                        },
+                        child: ImageViewer(
+                          img: base64Decode(futureImages[index]['data'].split(',')[1],), 
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyImageGallery(images: futureImages, current_img: index),
+                              ),
+                            );
+                          },
+                        ),
+                          
+                      ),
+                    );
+                  },
+                ),
+        ),
       )
     );
   }
