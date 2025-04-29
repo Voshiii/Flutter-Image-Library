@@ -44,6 +44,10 @@ class ThemeProvider extends ChangeNotifier {
     themeData = isDarkMode ? lightMode : darkMode;
   }
 
+  ThemeData getThemeData() {
+    return themeData;
+  }
+
   Future<String> getCurrentTheme() async {
     return await PreferencesTheme.loadTheme();
   }
