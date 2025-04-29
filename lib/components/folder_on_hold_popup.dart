@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/folder_button.dart';
 import 'package:photo_album/components/info_modal.dart';
 import 'package:photo_album/components/my_delete_popup.dart';
 import 'package:photo_album/components/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
+import 'package:photo_album/services/share_img.dart';
+
 
 void showContextMenu(BuildContext context, 
     LayerLink layerLink, 
@@ -13,9 +18,10 @@ void showContextMenu(BuildContext context,
     OverlayEntry? _overlayEntry,
     Future<void> Function()? onRefresh,
     dynamic data,
-    String parsedFolderName
+    String parsedFolderName,
   ){
   final screenSize = MediaQuery.of(context).size;
+  final AuthService _authService = AuthService();
 
   // Safe margin
   final popupWidth = 160.0;
@@ -126,32 +132,48 @@ void showContextMenu(BuildContext context,
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                          Column(
-                            children: [
-                              Icon(Icons.folder_copy),
-                              Text(
-                                "Copy",
-                                style: TextStyle(fontSize: 10),
-                              )
-                            ],
+                          
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.folder_copy),
+                                  Text(
+                                    "Copy",
+                                    style: TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
-                          Column(
-                            children: [
-                              Icon(Icons.ios_share),
-                              Text(
-                                "Share",
-                                style: TextStyle(fontSize: 10),
-                              )
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Icon(Icons.drive_file_move),
-                              Text(
-                                "Move",
-                                style: TextStyle(fontSize: 10),
-                              )
-                            ],
+                          
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () async {
+                                List<dynamic> folderImages = await _authService.fetchImages(data["name"]);
+                                List<Uint8List> savedImages = [];
+                                for (var i = 0; i < folderImages.length; i++){
+                                  savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));
+                                }
+                                if (savedImages.isNotEmpty) shareImages(savedImages);
+                                await controller.reverse();
+                                _overlayEntry?.remove();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Folder is empty!')),
+                                );
+                              },
+                              behavior: HitTestBehavior.opaque,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.ios_share),
+                                  Text(
+                                    "Share",
+                                    style: TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
                         ],),
                       ),
@@ -188,6 +210,9 @@ void showContextMenu(BuildContext context,
                             await onRefresh?.call();
                           }
                           // To-do: Show popup when failed
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error renaming folder!')),
+                          );
 
                         },
                       ),
