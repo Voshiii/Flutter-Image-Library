@@ -16,9 +16,22 @@ class _MyThemePageState extends State<MyThemePage> {
     {"label": "Same as device", "value": "device"},
   ];
 
+  var currentTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTheme();
+  }
+
+  void _loadTheme() async {
+    currentTheme = await Provider.of<ThemeProvider>(context, listen: false).getCurrentTheme();
+    setState(() {}); // Refresh the UI after loading
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentTheme = Provider.of<ThemeProvider>(context).getCurrentTheme();
+    // final currentTheme = Provider.of<ThemeProvider>(context).getCurrentTheme();
 
     return Scaffold(
       appBar: AppBar(title: Text("Theme")),

@@ -23,10 +23,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: isLoggedIn ? HomeScreen() : LoginPage(),
-      theme: Provider.of<ThemeProvider>(context).themeData,
+      theme: themeProvider.themeData,
     );
   }
 }

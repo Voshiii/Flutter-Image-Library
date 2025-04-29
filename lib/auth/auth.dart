@@ -109,15 +109,7 @@ class AuthService {
       
       if (response.statusCode == 200) {
         // Parse the response
-        // print(response.body);
-        // final Map<String, dynamic> data = jsonDecode(response.body);
         final List<dynamic> data = jsonDecode(response.body)["folders"];
-        // print(data[0]);
-        // List<String> folders = List<String>.from(data['folders']);
-        
-        // Yield the folders list
-        // print(folders);
-        // yield folders;
         yield data;
       } 
       else {
@@ -201,12 +193,9 @@ class AuthService {
       }),
     );
 
-    // ADD A SUCCESS SCREEN
+    // To-DO: ADD A SUCCESS SCREEN
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      return data;
-      // return List<String>.from(data['images']);
+      print("Success!");
     }
     else{
       // return [];
@@ -306,10 +295,9 @@ class AuthService {
       }),
     );
 
-    // ADD A SUCCESS SCREEN
+    // To-Do: ADD A SUCCESS SCREEN
     if (response.statusCode == 200) {
-      // final data = jsonDecode(response.body);
-      // return List<String>.from(data['images']);
+      print("Success!");
     }
     else{
       print("Error Deleting");

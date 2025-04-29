@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/my_button.dart';
-// import 'package:flutter/services.dart';
 import 'package:photo_album/components/text_field.dart';
 
 class LoginPage extends StatelessWidget {
@@ -20,7 +19,7 @@ class LoginPage extends StatelessWidget {
           children: [
             Text.rich(
               TextSpan(
-                text: 'Welcome back ', // normal text
+                text: 'Welcome back ',
                 children: <TextSpan>[
                   TextSpan(text: "Voshon", style: TextStyle(fontWeight: FontWeight.bold)),
                   TextSpan(text: "!"),
