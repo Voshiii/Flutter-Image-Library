@@ -5,6 +5,7 @@ class MyTextfield extends StatelessWidget {
   final bool obscureText;
   final TextEditingController controller;
   final FocusNode? focusNode;
+  final List<String> autofillHints;
   
   const MyTextfield({
     super.key,
@@ -12,16 +13,18 @@ class MyTextfield extends StatelessWidget {
     required this.obscureText,
     required this.controller,
     this.focusNode,
+    required this.autofillHints,
 });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: TextField(
+      child: TextFormField(
         obscureText: obscureText,
         controller: controller,
         focusNode: focusNode,
+        autofillHints: [AutofillHints.username],
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color:  Theme.of(context).colorScheme.tertiary,),

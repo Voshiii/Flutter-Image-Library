@@ -138,7 +138,7 @@ void showContextMenu(BuildContext context,
                               behavior: HitTestBehavior.opaque,
                               child: Column(
                                 children: [
-                                  Icon(Icons.folder_copy),
+                                  Icon(Icons.folder_copy), // MAYBE REMOVE COPY
                                   Text(
                                     "Copy",
                                     style: TextStyle(fontSize: 10),

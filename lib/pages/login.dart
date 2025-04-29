@@ -30,18 +30,26 @@ class LoginPage extends StatelessWidget {
 
             SizedBox(height: 20,),
 
-            MyTextfield(
-              hintText: "Username",
-              obscureText: false,
-              controller: _emailController,
-            ),
-
-            SizedBox(height: 10,),
-            
-            MyTextfield(
-              hintText: "Password",
-              obscureText: true,
-              controller: _pwdController,
+            AutofillGroup(
+              child: Column(
+                children: [
+                  MyTextfield(
+                    hintText: "Username",
+                    obscureText: false,
+                    controller: _emailController,
+                    autofillHints: [AutofillHints.username],
+                  ),
+                  
+                  SizedBox(height: 10,),
+                  
+                  MyTextfield(
+                    hintText: "Password",
+                    obscureText: true,
+                    controller: _pwdController,
+                    autofillHints: [AutofillHints.password],
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: 10,),
