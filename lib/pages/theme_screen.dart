@@ -26,6 +26,7 @@ class _MyThemePageState extends State<MyThemePage> {
 
   void _loadTheme() async {
     currentTheme = await Provider.of<ThemeProvider>(context, listen: false).getCurrentTheme();
+    print(currentTheme);
     setState(() {}); // Refresh the UI after loading
   }
 
@@ -57,6 +58,7 @@ class _MyThemePageState extends State<MyThemePage> {
                   onTap: () {
                     Provider.of<ThemeProvider>(context, listen: false)
                       .setThemeData(option["value"]!);
+                    _loadTheme();
                   },
                   child: Container(
                     decoration: BoxDecoration(
