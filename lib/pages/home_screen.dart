@@ -32,6 +32,13 @@ class _HomescreenState extends State<HomeScreen> {
     hasInternet = await InternetConnection().hasInternetAccess;
   }
 
+  String getParsedFolderName(String folderName){
+    if (folderName.length > 15){
+      return "${folderName.substring(0, 6)}...${folderName.substring(folderName.length - 5)}";
+    }
+    return folderName;
+  }
+
 
   Widget _buildImageView() {
     OverlayEntry? overlayEntry;
@@ -95,8 +102,7 @@ class _HomescreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 12),
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                final folderName = snapshot.data![index]["name"];
-
+                final parsedFolderName = getParsedFolderName(snapshot.data![index]["name"]);
                 return Builder(
                   builder: (context) {
                     final layerLink = LayerLink();
@@ -109,18 +115,18 @@ class _HomescreenState extends State<HomeScreen> {
                         final position = renderBox.localToGlobal(Offset.zero);
                         final size = renderBox.size;
 
-                        showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index]);
+                        showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index], parsedFolderName);
                       },
                       child: CompositedTransformTarget(
                         link: layerLink,
                         child: MyFolderButton(
-                          folderName: folderName,
-                          backgroundColor: Color.fromARGB(255, 231, 231, 231),
+                          folderName: parsedFolderName,
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ImageScreen(folderName: folderName),
+                                builder: (context) => ImageScreen(folderName: parsedFolderName),
                               ),
                             );
                           },

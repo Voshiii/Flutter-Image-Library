@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/logout_popup.dart';
+import 'package:photo_album/pages/theme_screen.dart';
 
 
 class MySettingsPage extends StatelessWidget {
@@ -13,18 +14,6 @@ class MySettingsPage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // Thought: Will I keep this?
-          // ListTile(
-          //   title: Text(
-          //     'Recently Deleted',
-          //       style: TextStyle(
-          //         fontWeight: FontWeight.bold,
-          //         fontSize: 19
-          //       ),
-          //     ),
-          //   trailing: Icon(Icons.chevron_right),
-          //   onTap: () {},
-          // ),
           Divider(height: 1, thickness: 1.5, color: Colors.grey,),
           ListTile(
             tileColor: Theme.of(context).colorScheme.secondary,
@@ -43,14 +32,21 @@ class MySettingsPage extends StatelessWidget {
           ListTile(
             tileColor: Theme.of(context).colorScheme.secondary,
             title: Text(
-              'Theme (NOT IMPLEMENTED)',
+              'Theme',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 19
                 ),
               ),
             trailing: Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyThemePage(),
+                ),
+              );
+            },
           ),
 
           Divider(height: 1, thickness: 1.5, color: Colors.grey,),

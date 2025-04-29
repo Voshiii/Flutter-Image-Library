@@ -134,7 +134,8 @@ Widget _infoTile(String title, dynamic trailing) {
       ListTile(
         title: Row(
           children: [
-            Text(title, style: TextStyle(fontSize: 13, color: const Color.fromARGB(156, 0, 0, 0)),),
+            // Text(title, style: TextStyle(fontSize: 13, color: const Color.fromARGB(156, 0, 0, 0)),),
+            Text(title, style: TextStyle(fontSize: 13)),
             Spacer(),
             trailing is String
                 ? Text(trailing, style: TextStyle(fontSize: 13),)

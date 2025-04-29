@@ -23,15 +23,11 @@ class MyFolderButton extends StatelessWidget {
 
         child: InkWell(
           onTap: onTap,
-          // splashColor: const Color.fromARGB(255, 198, 198, 198),
-          // highlightColor: const Color.fromARGB(255, 198, 198, 198),
           splashColor: const Color.fromARGB(255, 138, 186, 198),
           highlightColor: const Color.fromARGB(255, 167, 215, 227),
           borderRadius: BorderRadius.circular(8),
           child: Ink(
             decoration: BoxDecoration(
-              // color: Theme.of(context).colorScheme.secondary,
-              // color: const Color.fromARGB(255, 231, 231, 231),
               color: backgroundColor,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -44,7 +40,7 @@ class MyFolderButton extends StatelessWidget {
                     size: 65,
                     color: Colors.blue,
                   ),
-                  Text(data["name"]),
+                  Text(folderName),
                   Text(
                     'Items: ${data["itemCount"].toString()}',
                     style: TextStyle(

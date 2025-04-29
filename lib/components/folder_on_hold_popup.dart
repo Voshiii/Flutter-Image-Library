@@ -12,7 +12,8 @@ void showContextMenu(BuildContext context,
     Size size, 
     OverlayEntry? _overlayEntry,
     Future<void> Function()? onRefresh,
-    dynamic data
+    dynamic data,
+    String parsedFolderName
   ){
   final screenSize = MediaQuery.of(context).size;
 
@@ -82,8 +83,8 @@ void showContextMenu(BuildContext context,
                   width: 120,
                   height: 120,
                   child: MyFolderButton(
-                    folderName: data["name"],
-                    backgroundColor: Colors.black.withOpacity(0.2),
+                    folderName: parsedFolderName,
+                    backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
                     data: data,
                     onTap: () {
                       controller.dispose();
@@ -91,7 +92,7 @@ void showContextMenu(BuildContext context,
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ImageScreen(folderName: data["name"]),
+                          builder: (context) => ImageScreen(folderName: parsedFolderName),
                         ),
                       );
                     },
@@ -113,7 +114,7 @@ void showContextMenu(BuildContext context,
                 child: Container(
                   width: popupWidth + 70,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(197, 255, 255, 255),
+                    color: Theme.of(context).colorScheme.secondary.withAlpha(197),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
                   ),
