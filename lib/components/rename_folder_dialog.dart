@@ -23,7 +23,8 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
   void initState() {
     super.initState();
     _textController.text = widget.oldFolderName;
-    _isCancelEnabled = _textController.text.trim().isNotEmpty;
+    final text = _textController.text.trim();
+    _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
     _textController.addListener(_handleTextChanged);
   }
 
@@ -35,7 +36,8 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
 
   void _handleTextChanged() {
     setState(() {
-      _isCancelEnabled = _textController.text.trim().isNotEmpty;
+      final text = _textController.text.trim();
+      _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
     });
   }
 
@@ -70,7 +72,7 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
       ),
       actions: [
         CupertinoDialogAction(
-          onPressed: _textController.text.trim().isEmpty
+          onPressed: !_isCancelEnabled
           ? null
           : () async {
             final bool result = await _authService.renameFolder(widget.oldFolderName, _textController.text);
@@ -88,8 +90,8 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
             "Cancel",
             style: TextStyle(color: const Color.fromARGB(255, 227, 1, 1)),
           ),
-          onPressed: () => {
-            Navigator.of(context).pop(false),
+          onPressed: () {
+            Navigator.of(context).pop(false);
           },
         )
       ],
