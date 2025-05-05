@@ -24,7 +24,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
-        //
+
         imagePath = File(pickedFile.path).uri.pathSegments.last;  // Get the name of the image file
       });
     }
@@ -43,82 +43,86 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _selectedImage != null
-              ? Image.file(_selectedImage!, height: 150) // Show selected image
-              : Container(
-                  height: 150,
-                  width: 150,
-                  color: Colors.grey[300],
-                  child: Icon(Icons.image, size: 50, color: Colors.grey),
-                ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text("Select Image", style: TextStyle(color: Colors.black),),
-              ),
-              SizedBox(width: 10,),
-              ElevatedButton(
-                onPressed: _removeImage,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text("Reset", style: TextStyle(color: Colors.white),),
-              ),
-            ],
+          GestureDetector(
+            onTap: _pickImage,
+            child: Column(
+              children: [
+                _selectedImage != null
+                    ? Image.file(_selectedImage!, height: 150) // Show selected image
+                    : Container(
+                        height: 150,
+                        width: 150,
+                        color: Colors.grey[300],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text("Select image", style: TextStyle(color: const Color.fromARGB(255, 44, 44, 44)),),
+                            Icon(Icons.image, size: 50, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+              ],
+            ),
           ),
+          
+          SizedBox(height: 10),
         ],
       ),
       actions: [
-        ElevatedButton(
-          style: TextButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 213, 213, 213), // Set the background color
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // Optional: Add padding
-          ),
-          onPressed: () async {
-            if (_selectedImage != null) {
-              try {
-                await _authService.addImage(_selectedImage, widget.folderName, imagePath);
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+              onPressed: _removeImage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedImage != null 
+                ? Colors.red
+                : const Color.fromARGB(255, 138, 138, 138),
+              ),
+              child: Text("Clear", style: TextStyle(color: Colors.black),),
+            ),
 
-                // Optionally, show a success message here
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Image uploaded successfully!')),
-                );
-                Navigator.of(context).pop(true);
-                // Navigator.pop(context);
-              }
-              catch(e){
-                // Handle any errors that may occur during upload
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Upload failed: $e')),
-                );
-              }
-            }
-            else{
-              // Handle case where no image is selected
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('No image selected!')),
-              );
-            }
+            SizedBox(width: 10,),
+
+            ElevatedButton(
+              style: TextButton.styleFrom(
+                backgroundColor: _selectedImage != null
+                ? const Color.fromARGB(255, 18, 158, 0)
+                : const Color.fromARGB(255, 138, 138, 138),
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              ),
+              onPressed: () async {
+                if (_selectedImage != null) {
+                  try {
+                    await _authService.addImage(_selectedImage, widget.folderName, imagePath);
             
-
-            // Implement upload function
-            // _authService.addImage(_selectedImage, "NewName", widget.folderName);
-            // Navigator.pop(context); // Close dialog
-          },
-          child: Text("Upload", style: TextStyle(color: Colors.black)),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Image uploaded successfully!')),
+                    );
+                    Navigator.of(context).pop(true);
+                    // Navigator.pop(context);
+                  }
+                  catch(e){
+                    // Handle any errors that may occur during upload
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Upload failed: $e')),
+                    );
+                  }
+                }
+                else{
+                  // Handle case where no image is selected
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No image selected!')),
+                  );
+                }
+            
+              },
+              child: Text("Upload", style: TextStyle(color: Colors.black)),
+            ),
+          ],
         ),
       ],
     );
   }
 }
-
-// Function to show the dialog
-// void showImageSelectorDialog(BuildContext context) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return ImageSelectorDialog(folderName: ,);
-//     },
-//   );
-// }

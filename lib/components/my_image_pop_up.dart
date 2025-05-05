@@ -29,8 +29,6 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
       title: Center(
         child: Column(
           children: [
-            // Image.file(widget.img!, height: 150) // Show selected image
-            // Image.memory(base64Decode(widget.img)),
             Image.memory(widget.img),
         ]),
         
@@ -41,10 +39,9 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 214, 214, 214),
+                color: Colors.red,
                 borderRadius: BorderRadius.circular(10),  
               ),
-              // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: ()  {
                   // Code to delete image
@@ -54,7 +51,7 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
                 },
                 child: Text(
                   "Delete",
-                  style: TextStyle(color: Colors.red, fontSize: 15),
+                  style: TextStyle(color: Colors.black, fontSize: 15),
                 ),
               ),
             ),
@@ -63,16 +60,11 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
 
             Container(
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 214, 214, 214),
+                color: Colors.green,
                 borderRadius: BorderRadius.circular(10),  
               ),
-              // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: () async {
-                  // To-do: put in function
-
-
-                  // Uint8List bytes = base64Decode(widget.img);
                   Uint8List bytes = widget.img;
 
                   // Save to gallery
@@ -92,7 +84,7 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
                 },
                 child: Text(
                   "Save",
-                  style: TextStyle(color: Colors.green, fontSize: 15),
+                  style: TextStyle(color: Colors.black, fontSize: 15),
                 ),
               ),
             ),
@@ -104,7 +96,6 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
                 color: const Color.fromARGB(255, 214, 214, 214),
                 borderRadius: BorderRadius.circular(10),
               ),
-              // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
                 onPressed: () {
                   Navigator.pop(context);

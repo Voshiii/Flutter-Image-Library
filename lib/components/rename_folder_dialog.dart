@@ -76,6 +76,11 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
           ? null
           : () async {
             final bool result = await _authService.renameFolder(widget.oldFolderName, _textController.text);
+            if (result == false) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to rename folder!')),
+              );
+            }
             Navigator.of(context).pop(result);
           },
           child: Text(
