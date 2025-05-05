@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/folder_button.dart';
@@ -20,15 +21,43 @@ class HomeScreen extends StatefulWidget {
 class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   bool hasInternet = true;
+  late Stream<List<dynamic>> _folderStream;
+
+
+  TextEditingController _searchController = TextEditingController();
+  List<dynamic> _allFolders = [];
+  List<dynamic> _filteredFolders = [];
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 2000));
+    _folderStream = _authService.getFolders(context);
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredFolders = _allFolders
+          .where((folder) => folder["name"].toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
+  @override
+  void dispose() {
+   _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> refreshFolders() async {
-    setState(() {});
+    setState(() {
+      _folderStream = _authService.getFolders(context);
+      _allFolders = [];
+      _filteredFolders = [];
+    });
     hasInternet = await InternetConnection().hasInternetAccess;
   }
 
@@ -44,7 +73,7 @@ class _HomescreenState extends State<HomeScreen> {
     OverlayEntry? overlayEntry;
 
     return StreamBuilder<List<dynamic>>(
-      stream: _authService.getFolders(context),
+      stream: _folderStream,
       builder: (context, snapshot) {
         if(!hasInternet){
           return Column(
@@ -91,54 +120,89 @@ class _HomescreenState extends State<HomeScreen> {
           );
         }
 
-        return Stack(
-          children: [
-            GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+        if (_allFolders.isEmpty || _allFolders.length != snapshot.data!.length) {
+          _allFolders = snapshot.data!;
+          _filteredFolders = _searchController.text.isEmpty
+              ? _allFolders
+              : _allFolders
+                  .where((folder) => folder["name"]
+                      .toLowerCase()
+                      .contains(_searchController.text.toLowerCase()))
+                  .toList();
+        }
+
+
+        return GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  onChanged: (_) => _onSearchChanged(),
+                  placeholder: 'Search folders...',
+                  prefixIcon: Icon(Icons.search),
+                  suffixIcon: Icon(Icons.clear),
+                ),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final parsedFolderName = getParsedFolderName(snapshot.data![index]["name"]);
-                return Builder(
-                  builder: (context) {
-                    final layerLink = LayerLink();
-                    final key = GlobalKey();
-
-                    return GestureDetector(
-                      key: key,
-                      onLongPress: () {
-                        final renderBox = key.currentContext!.findRenderObject() as RenderBox;
-                        final position = renderBox.localToGlobal(Offset.zero);
-                        final size = renderBox.size;
-
-                        showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, snapshot.data![index], parsedFolderName);
-                      },
-                      child: CompositedTransformTarget(
-                        link: layerLink,
-                        child: MyFolderButton(
-                          folderName: parsedFolderName,
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ImageScreen(folderName: parsedFolderName),
+          
+              Expanded(
+                child: Stack(
+                  children: [
+                    GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _filteredFolders.length,
+                      itemBuilder: (context, index) {
+                        final parsedFolderName = getParsedFolderName(_filteredFolders[index]["name"]);
+                        return Builder(
+                          builder: (context) {
+                            final layerLink = LayerLink();
+                            final key = GlobalKey();
+                
+                            return GestureDetector(
+                              key: key,
+                              onLongPress: () {
+                                final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+                                final position = renderBox.localToGlobal(Offset.zero);
+                                final size = renderBox.size;
+                
+                                showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, _filteredFolders[index], parsedFolderName);
+                              },
+                              child: CompositedTransformTarget(
+                                link: layerLink,
+                                child: MyFolderButton(
+                                  folderName: parsedFolderName,
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ImageScreen(folderName: parsedFolderName),
+                                      ),
+                                    );
+                                  },
+                                  data: _filteredFolders[index]
+                                ),
                               ),
                             );
                           },
-                          data: snapshot.data![index]
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30,)
+            ],
+          ),
         );
       });
   }
@@ -157,10 +221,7 @@ class _HomescreenState extends State<HomeScreen> {
                 context: context,
                 builder: (BuildContext context) => PopUpAddFolder(),
               ).then((reload) {
-                if(reload == true){
-                  // Reload page after submitting
-                  setState(() {});
-                }
+                if(reload == true){refreshFolders();}
               });
             },
           ),

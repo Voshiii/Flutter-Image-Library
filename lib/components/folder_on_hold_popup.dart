@@ -25,7 +25,7 @@ void showContextMenu(BuildContext context,
 
   // Safe margin
   final popupWidth = 160.0;
-  final popupHeight = 250.0;
+  final popupHeight = 320.0;
 
   // Clamp the position to keep the popup on-screen
   double dx = position.dx;

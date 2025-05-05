@@ -69,6 +69,7 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
 
                   // Save to gallery
                   final result = await ImageGallerySaver.saveImage(bytes);
+                  // if (!mounted) return;
                   if(result['isSuccess'] == true){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Succesfully saved image.')),

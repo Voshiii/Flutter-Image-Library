@@ -26,7 +26,6 @@ class _MyThemePageState extends State<MyThemePage> {
 
   void _loadTheme() async {
     currentTheme = await Provider.of<ThemeProvider>(context, listen: false).getCurrentTheme();
-    print(currentTheme);
     setState(() {}); // Refresh the UI after loading
   }
 
