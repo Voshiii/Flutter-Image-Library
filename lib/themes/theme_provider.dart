@@ -5,28 +5,19 @@ import 'package:photo_album/themes/light_mode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class ThemeProvider extends ChangeNotifier {
+class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   late ThemeData _themeData = darkMode;
+  String _currentTheme = "device";
 
   ThemeProvider() {
+    WidgetsBinding.instance.addObserver(this);
     _initTheme();
   }
 
   Future<void> _initTheme() async {
     final saved = await PreferencesTheme.loadTheme();
 
-    switch (saved) {
-      case "light":
-        _themeData = lightMode;
-        break;
-      case "dark":
-        _themeData = darkMode;
-        break;
-      default:
-        final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
-        _themeData = (brightness == Brightness.dark) ? darkMode : lightMode;
-        break;
-    }
+    setThemeData(saved);
 
     notifyListeners();
   }
@@ -56,22 +47,45 @@ class ThemeProvider extends ChangeNotifier {
     switch (theme){
       case "light":
       themeData = lightMode;
+      _currentTheme = "light";
       break;
 
       case "dark":
       themeData = darkMode;
+      _currentTheme = "dark";
       break;
 
       case "device":
       themeData = SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark
         ? darkMode
         : lightMode;
+        _currentTheme = "device";
       break;
     }
 
     // currentTheme = theme;
     await PreferencesTheme.saveTheme(theme);
     notifyListeners();
+  }
+  
+
+  void _setThemeFromSystem() {
+    final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    _themeData = (brightness == Brightness.dark) ? darkMode : lightMode;
+  }
+
+  @override
+  void didChangePlatformBrightness() async {
+    if (_currentTheme == "device") {
+      _setThemeFromSystem();
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
 }
