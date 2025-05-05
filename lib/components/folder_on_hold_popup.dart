@@ -209,10 +209,12 @@ void showContextMenu(BuildContext context,
                           if (result == true) {
                             await onRefresh?.call();
                           }
-                          // To-do: Show popup when failed
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error renaming folder!')),
-                          );
+                          else{
+                            // To-do: Show popup when failed
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error renaming folder!')),
+                            );
+                          }
 
                         },
                       ),

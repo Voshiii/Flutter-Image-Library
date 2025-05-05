@@ -2,14 +2,38 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 
-class PopUpAddFolder extends StatelessWidget {
-  final TextEditingController _textController = TextEditingController();
+class PopUpAddFolder extends StatefulWidget {
 
-  final AuthService _authService = AuthService();
-  
-  PopUpAddFolder({
+  const PopUpAddFolder({
     super.key,
   });
+
+  @override
+  State<PopUpAddFolder> createState() => _PopUpAddFolderState();
+}
+
+class _PopUpAddFolderState extends State<PopUpAddFolder> {
+  final TextEditingController _textController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isCancelEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_handleTextChanged);
+  }
+  
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _handleTextChanged() {
+    setState(() {
+      _isCancelEnabled = _textController.text.trim().isNotEmpty;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,28 +51,38 @@ class PopUpAddFolder extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
+            
             CupertinoTextField(
               controller: _textController,
               placeholder: "Folder name",
+              style: TextStyle(
+              color: CupertinoTheme.of(context).brightness == Brightness.dark
+                  ? CupertinoColors.white
+                  : CupertinoColors.black,
+              ),
             )
           ],
         ),
       ),
       actions: [
         CupertinoDialogAction(
+          onPressed: _textController.text.trim().isEmpty
+          ? null
+          : () async {
+            _authService.addFolder(_textController.text);
+            Navigator.of(context).pop(true);
+          },
           child: Text(
             "Ok",
-            style: TextStyle(color: Colors.blue),
+            style: _isCancelEnabled
+            ? TextStyle(color: Colors.blue)
+            : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
           ),
-          onPressed: () => {
-            _authService.addFolder(_textController.text),
-            Navigator.of(context).pop(true),
-          },
         ),
         CupertinoDialogAction(
           child: Text(
             "Cancel",
-            style: TextStyle(color: const Color.fromARGB(255, 46, 46, 46)),
+            style: TextStyle(color: const Color.fromARGB(255, 227, 1, 1)),
           ),
           onPressed: () => {
             Navigator.of(context).pop(false),
@@ -58,8 +92,4 @@ class PopUpAddFolder extends StatelessWidget {
 
     );
   }
-
-  
-
-  
 }
