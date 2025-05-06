@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +6,8 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:photo_album/pages/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// TO-DO: SPLIT THIS UP INTO ITS OWN FILES
 
 class AuthService {
   static String? cachedUsername;
@@ -215,47 +216,6 @@ class AuthService {
       // return [];
       print("Error updating");
       // return [];
-    }
-  }
-
-  // Change to "addFile"
-  Future<void> addImage(File? image, String folderName, String imageName) async {
-    try {
-      String? username = await getUsername();
-      String? password = await getPassword();
-      Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-      String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-      // Create a MultipartRequest
-      var request = http.MultipartRequest('POST', Uri.parse(url.toString()));
-
-      // Add headers
-      request.headers['Authorization'] = basicAuth;
-
-      //To-do: Check for duplicate names      
-      request.fields['fileName'] = imageName;
-
-      // Attach the image file
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'file',
-          image!.path,
-        ),
-      );
-
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        // Parse the response
-        final responseData = await http.Response.fromStream(response);
-        print('Upload successful: ${responseData.body}');
-      } else {
-        print('Upload failed with status: ${response.statusCode}');
-      }
-
-    }
-    catch (e) {
-      print('Error: $e');
     }
   }
 
