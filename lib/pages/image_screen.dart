@@ -124,10 +124,26 @@ class _ImageScreenState extends State<ImageScreen> {
                         child: ImageViewer(
                           img: base64Decode(futureImages[index]['data'].split(',')[1],), 
                           onTap: () {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => MyImageGallery(images: futureImages, current_img: index),
+                            //   ),
+                            // );
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => MyImageGallery(images: futureImages, current_img: index),
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation, secondaryAnimation) => MyImageGallery(
+                                  images: futureImages,
+                                  current_img: index,
+                                ),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration: Duration(milliseconds: 100), // Very fast fade
                               ),
                             );
                           },

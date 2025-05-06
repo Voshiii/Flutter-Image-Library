@@ -35,19 +35,24 @@ class _MyImageGalleryState extends State<MyImageGallery> {
     super.dispose();
   }
 
+  void updateDragVal(DragUpdateDetails details){
+    _verticalDrag += details.delta.dy;
+  }
+
 
   @override
   Widget build(BuildContext context) {
 
     return GestureDetector(
-      // To-Do: Make smooth drag
+      // To-Do: Change how it closes
       onVerticalDragUpdate: (details) {
-        setState(() {
-          _verticalDrag += details.delta.dy;
-        });
+        updateDragVal(details);
+        // setState(() {
+        //   _verticalDrag += details.delta.dy;
+        // });
       },
       onVerticalDragEnd: (details) {
-        if (_verticalDrag > 100) {
+        if (_verticalDrag > 50) {
           Navigator.pop(context); // Close on downward swipe
         }
         _verticalDrag = 0; // Reset
