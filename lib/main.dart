@@ -1,6 +1,6 @@
-import 'package:animated_splash_screen/animated_splash_screen.dart';
+// import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
+// import 'package:page_transition/page_transition.dart';
 import 'package:photo_album/pages/splash_screen.dart';
 import 'package:photo_album/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -24,16 +24,16 @@ class MainApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AnimatedSplashScreen(
-        splash: 'assets/hello-hi.gif',
-        splashIconSize: 2000,
-        centered: true,
-        nextScreen: MySplashScreen(),
-        duration: 1500,
-        // splashTransition: SplashTransition.rotationTransition,
-        pageTransitionType: PageTransitionType.fade,
-      ),
-      // home: MySplashScreen(),
+      // home: AnimatedSplashScreen(
+      //   splash: 'assets/hello-hi.gif',
+      //   splashIconSize: 2000,
+      //   centered: true,
+      //   nextScreen: MySplashScreen(),
+      //   duration: 1500,
+      //   // splashTransition: SplashTransition.rotationTransition,
+      //   pageTransitionType: PageTransitionType.fade,
+      // ),
+      home: MySplashScreen(),
       theme: themeProvider.themeData,
     );
   }

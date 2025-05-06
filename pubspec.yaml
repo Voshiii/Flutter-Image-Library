@@ -43,6 +43,7 @@ flutter:
     - riv_assets/fillfolder.riv
     - riv_assets/emptyfolder.riv
     - riv_assets/nowifi.riv
-    - assets/Icon180x180.png
+    - assets/SplashScreenImg.png
+    - assets/SplashScreenFirstBig.png
     - assets/hello-hi.gif
     - .env
