@@ -42,11 +42,17 @@ class _SplashScreenState extends State<MySplashScreen> with SingleTickerProvider
       // Wait for animation to finish too
       await Future.delayed(Duration(seconds: 2));
 
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomeScreen(folderStream: responseData)),
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (_, animation, __) => HomeScreen(folderStream: responseData),
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 800),
+        ),
       );
+
+
     }
   }
 
@@ -62,7 +68,7 @@ class _SplashScreenState extends State<MySplashScreen> with SingleTickerProvider
       body: FadeTransition(
         opacity: _animation,
         child: Center(
-          child: Image.asset('assets/Icon180x180.png', height: 100),
+          child: Image.asset('assets/Icon180x180.png', height: 400),
         ),
       ),
     );

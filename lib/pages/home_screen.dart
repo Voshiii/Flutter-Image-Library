@@ -16,7 +16,6 @@ import 'package:photo_album/components/folder_on_hold_popup.dart';
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
   late Stream<List<dynamic>> folderStream;
-  // late List<dynamic> folderStream;
 
   HomeScreen({
     super.key,
@@ -30,8 +29,6 @@ class HomeScreen extends StatefulWidget {
 class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   bool hasInternet = true;
-  // late Stream<List<dynamic>> _folderStream;
-
 
   TextEditingController _searchController = TextEditingController();
   List<dynamic> _allFolders = [];
@@ -41,12 +38,12 @@ class _HomescreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 2000));
-    // widget.folderStream = _authService.getFolders();
     _searchController.addListener(_onSearchChanged);
   }
 
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
+    if (!mounted) return;
     setState(() {
       _filteredFolders = _allFolders
           .where((folder) => folder["name"].toLowerCase().contains(query))
@@ -62,8 +59,8 @@ class _HomescreenState extends State<HomeScreen> {
   }
 
   Future<void> refreshFolders() async {
+    if (!mounted) return;
     setState(() {
-      // widget.folderStream = _authService.getFolders();
       widget.folderStream = _authService.fetchInstantFolder();
       _allFolders = [];
       _filteredFolders = [];
