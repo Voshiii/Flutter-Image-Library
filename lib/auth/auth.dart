@@ -151,6 +151,7 @@ class AuthService {
     }
   }
 
+  // Change to "fetchFiles"
   Future<List<dynamic>> fetchImages(String folderName) async {
     String? username = await getUsername();
     String? password = await getPassword();
@@ -162,6 +163,7 @@ class AuthService {
       url,
       headers: {
         'Authorization': basicAuth,
+        // 'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
         'Content-Type': 'image/jpeg',
       },
     );
@@ -204,6 +206,7 @@ class AuthService {
     }
   }
 
+  // Change to "addFile"
   Future<void> addImage(File? image, String folderName, String imageName) async {
     try {
       String? username = await getUsername();

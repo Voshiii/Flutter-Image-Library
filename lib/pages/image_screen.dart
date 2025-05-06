@@ -32,6 +32,7 @@ class _ImageScreenState extends State<ImageScreen> {
   List<String> images = [];
 
   Future<void> refreshImages() async {
+    if (!mounted) return;
     setState(() {
       _loadImages();
     });
@@ -45,6 +46,7 @@ class _ImageScreenState extends State<ImageScreen> {
 
   void _loadImages() async {
     futureImages = await _authService.fetchImages(widget.folderName);
+    if (!mounted) return;
     setState(() {}); // Trigger a rebuild with the new data
     _isLoading = false;
   }
