@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/components/folder_button.dart';
-import 'package:photo_album/components/info_modal.dart';
-import 'package:photo_album/components/my_delete_popup.dart';
-import 'package:photo_album/components/rename_folder_dialog.dart';
+import 'package:photo_album/components/home_page_comp/folder_button.dart';
+import 'package:photo_album/components/home_page_comp/info_modal.dart';
+import 'package:photo_album/components/home_page_comp/my_delete_popup.dart';
+import 'package:photo_album/components/home_page_comp/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
 import 'package:photo_album/services/share_img.dart';
 

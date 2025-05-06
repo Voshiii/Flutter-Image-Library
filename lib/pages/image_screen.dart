@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/components/empty_folder_anim.dart';
-import 'package:photo_album/components/image_gallery.dart';
-import 'package:photo_album/components/image_viewer.dart';
-import 'package:photo_album/components/loading_anim.dart';
-import 'package:photo_album/components/my_image_pop_up.dart';
+import 'package:photo_album/components/image_screen_comp/empty_folder_anim.dart';
+import 'package:photo_album/components/image_screen_comp/image_gallery.dart';
+import 'package:photo_album/components/image_screen_comp/image_viewer.dart';
+import 'package:photo_album/components/image_screen_comp/loading_anim.dart';
+import 'package:photo_album/components/image_screen_comp/my_image_pop_up.dart';
 import 'dart:convert';
 
-import 'package:photo_album/components/image_selector.dart';
+import 'package:photo_album/components/image_screen_comp/image_selector.dart';
 
 class ImageScreen extends StatefulWidget {
   final String folderName;

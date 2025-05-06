@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/pages/login.dart';
-// import 'package:photo_album/components/text_field.dart';
 
 class LogoutPopup extends StatelessWidget {  
   const LogoutPopup({super.key,});

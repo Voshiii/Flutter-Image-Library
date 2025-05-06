@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/components/folder_button.dart';
-import 'package:photo_album/components/no_internet.dart';
-import 'package:photo_album/components/pop_up_add_folder.dart';
+import 'package:photo_album/components/home_page_comp/folder_button.dart';
+import 'package:photo_album/components/home_page_comp/no_internet.dart';
+import 'package:photo_album/components/home_page_comp/pop_up_add_folder.dart';
 import 'package:photo_album/pages/image_screen.dart';
 import 'package:photo_album/pages/settings_screen.dart';
 import 'package:rive/rive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:photo_album/components/folder_on_hold_popup.dart';
+import 'package:photo_album/components/home_page_comp/folder_on_hold_popup.dart';
 
 // This class (or a class that this class inherits from) is marked as 
 //'@immutable', but one or more of its instance fields aren't final: 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photo_album/components/logout_popup.dart';
+import 'package:photo_album/components/settings_page_comp/logout_popup.dart';
 import 'package:photo_album/pages/theme_screen.dart';
 
 

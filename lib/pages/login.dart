@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/components/my_button.dart';
-import 'package:photo_album/components/text_field.dart';
+import 'package:photo_album/components/login_page_comp/my_button.dart';
+import 'package:photo_album/components/login_page_comp/text_field.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
