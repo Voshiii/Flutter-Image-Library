@@ -8,11 +8,14 @@ class MyImagePopUp extends StatefulWidget {
   // final String img;
   final Uint8List img;
   final String imgName;
+  final Future<void> Function()? reloadImages;
 
-  const MyImagePopUp({
+  MyImagePopUp({
+    super.key, 
     required this.folderName,
     required this.img,
     required this.imgName,
+    required this.reloadImages,
   }); // Constructor
 
   @override
@@ -22,6 +25,7 @@ class MyImagePopUp extends StatefulWidget {
 class _MyDeleteDialogState extends State<MyImagePopUp> {
   final AuthService _authService = AuthService();
   dynamic data;
+  bool _isdeleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +47,21 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
                 borderRadius: BorderRadius.circular(10),  
               ),
               child: TextButton(
-                onPressed: ()  {
+                onPressed: () async {
                   // Code to delete image
-                  _authService.deleteImage(widget.folderName, widget.imgName).then((_) {
-                    Navigator.of(context).pop(true);
-                  });
+                  if(!_isdeleting){
+                    setState(() {
+                      _isdeleting = true;
+                    });
+
+                    await _authService.deleteImage(widget.folderName, widget.imgName);
+                    await widget.reloadImages?.call();
+                    await Future.delayed(Duration(seconds: 1));
+                    setState(() {
+                      _isdeleting = false;
+                    });
+                    Navigator.of(context).pop();
+                  }
                 },
                 child: Text(
                   "Delete",
@@ -69,7 +83,6 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
 
                   // Save to gallery
                   final result = await ImageGallerySaver.saveImage(bytes);
-                  // if (!mounted) return;
                   if(result['isSuccess'] == true){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Succesfully saved image.')),

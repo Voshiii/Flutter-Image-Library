@@ -117,14 +117,9 @@ class _ImageScreenState extends State<ImageScreen> {
                               folderName: widget.folderName,
                               img: base64Decode(futureImages[index]['data'].split(',')[1]),
                               imgName: futureImages[index]['name'],
+                              reloadImages: refreshImages,
                             ),
-                            ).then((reload) {
-                              // Reload page after submitting
-                              if(reload == true){
-                                refreshImages();
-                                // setState(() {});
-                              }
-                            })
+                          )
                         },
                         child: ImageViewer(
                           img: base64Decode(futureImages[index]['data'].split(',')[1],), 
