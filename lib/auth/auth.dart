@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -56,9 +57,13 @@ class AuthService {
     if (response.statusCode == 200) {
       await saveCredentials(username, password);
 
+      // final responseData = getFolders();
+      final responseData = fetchInstantFolder();
+      await Future.delayed(Duration(seconds: 2));
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => HomeScreen(folderStream: responseData,)),
       );
     } else {
       showDialog(
@@ -90,8 +95,15 @@ class AuthService {
   );
 
 
-  // Stream<List<String>> getFolders(BuildContext context) async* {
-  Stream<List<dynamic>> getFolders(BuildContext context) async* {
+  final StreamController<List<dynamic>> _folderController = StreamController<List<dynamic>>();
+
+  Stream<List<dynamic>> fetchInstantFolder() {
+    // Start fetching instantly
+    getFolders();
+    return _folderController.stream;
+  }
+
+  Future<void> getFolders() async {
     String? username = await getUsername();
     String? password = await getPassword();
     Uri url = Uri.parse('$baseUrl/uploads');
@@ -110,17 +122,17 @@ class AuthService {
       if (response.statusCode == 200) {
         // Parse the response
         final List<dynamic> data = jsonDecode(response.body)["folders"];
-        yield data;
+        _folderController.add(data);
       } 
       else {
         print("Error occured while trying to fetch folders!");
-        yield [];
         // throw Exception('Failed to load folders');
+        _folderController.add([]);
       }
     }
     catch(e){
       print("Exception: $e");
-      yield [];
+      _folderController.add([]);
     }
   }
 

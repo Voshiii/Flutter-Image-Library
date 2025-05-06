@@ -10,9 +10,18 @@ import 'package:rive/rive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:photo_album/components/folder_on_hold_popup.dart';
 
+// This class (or a class that this class inherits from) is marked as 
+//'@immutable', but one or more of its instance fields aren't final: 
+//HomeScreen.folderStream
+// ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key});
+  late Stream<List<dynamic>> folderStream;
+  // late List<dynamic> folderStream;
+
+  HomeScreen({
+    super.key,
+    required this.folderStream
+  });
 
   @override
   State<HomeScreen> createState() => _HomescreenState();
@@ -21,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   bool hasInternet = true;
-  late Stream<List<dynamic>> _folderStream;
+  // late Stream<List<dynamic>> _folderStream;
 
 
   TextEditingController _searchController = TextEditingController();
@@ -32,7 +41,7 @@ class _HomescreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 2000));
-    _folderStream = _authService.getFolders(context);
+    // widget.folderStream = _authService.getFolders();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -54,7 +63,8 @@ class _HomescreenState extends State<HomeScreen> {
 
   Future<void> refreshFolders() async {
     setState(() {
-      _folderStream = _authService.getFolders(context);
+      // widget.folderStream = _authService.getFolders();
+      widget.folderStream = _authService.fetchInstantFolder();
       _allFolders = [];
       _filteredFolders = [];
     });
@@ -73,7 +83,7 @@ class _HomescreenState extends State<HomeScreen> {
     OverlayEntry? overlayEntry;
 
     return StreamBuilder<List<dynamic>>(
-      stream: _folderStream,
+      stream: widget.folderStream,
       builder: (context, snapshot) {
         if(!hasInternet){
           return Column(
