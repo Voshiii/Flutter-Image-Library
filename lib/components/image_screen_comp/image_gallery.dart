@@ -6,12 +6,12 @@ import 'package:photo_view/photo_view.dart';
 
 class MyImageGallery extends StatefulWidget {
   final List<dynamic> images;
-  final int current_img;
+  final int currentImg;
 
   const MyImageGallery({
     super.key,
     required this.images,
-    required this.current_img,
+    required this.currentImg,
     });
 
   @override
@@ -26,7 +26,7 @@ class _MyImageGalleryState extends State<MyImageGallery> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.current_img); // Initialize the controller with the starting page
+    _pageController = PageController(initialPage: widget.currentImg); // Initialize the controller with the starting page
   }
 
   @override

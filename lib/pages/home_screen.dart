@@ -30,7 +30,7 @@ class _HomescreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   bool hasInternet = true;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<dynamic> _allFolders = [];
   List<dynamic> _filteredFolders = [];
 

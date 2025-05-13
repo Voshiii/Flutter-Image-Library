@@ -16,7 +16,7 @@ class _MyThemePageState extends State<MyThemePage> {
     {"label": "Same as device", "value": "device"},
   ];
 
-  var currentTheme;
+  late String currentTheme;
 
   @override
   void initState() {

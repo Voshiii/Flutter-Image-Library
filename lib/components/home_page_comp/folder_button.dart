@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_album/themes/dark_mode.dart';
 import 'package:photo_album/themes/theme_provider.dart';

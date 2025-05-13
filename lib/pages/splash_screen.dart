@@ -4,6 +4,8 @@ import 'package:photo_album/pages/home_screen.dart';
 import 'package:photo_album/pages/login.dart';
 
 class MySplashScreen extends StatefulWidget {
+  const MySplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }

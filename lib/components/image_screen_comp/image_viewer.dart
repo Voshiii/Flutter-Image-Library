@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class ImageViewer extends StatefulWidget {
   final Uint8List img;
   final VoidCallback onTap;
-  ImageViewer({
-    Key? key, 
+  const ImageViewer({
+    super.key, 
     required this.img, 
     required this.onTap
-  }) : super(key: key);
+  });
 
   @override
   _ImageViewerState createState() => _ImageViewerState();

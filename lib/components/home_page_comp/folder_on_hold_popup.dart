@@ -15,13 +15,13 @@ void showContextMenu(BuildContext context,
     LayerLink layerLink, 
     Offset position, 
     Size size, 
-    OverlayEntry? _overlayEntry,
+    OverlayEntry? overlayEntry,
     Future<void> Function()? onRefresh,
     dynamic data,
     String parsedFolderName,
   ){
   final screenSize = MediaQuery.of(context).size;
-  final AuthService _authService = AuthService();
+  final AuthService authService = AuthService();
 
   // Safe margin
   final popupWidth = 160.0;
@@ -52,7 +52,7 @@ void showContextMenu(BuildContext context,
   );
   final Animation<double> scale = CurvedAnimation(parent: controller, curve: Curves.easeOutBack);
 
-  _overlayEntry = OverlayEntry(
+  overlayEntry = OverlayEntry(
     builder: (context) {
       return Stack(
         children: [
@@ -60,7 +60,7 @@ void showContextMenu(BuildContext context,
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Color.fromRGBO(0, 0, 0, 0.3)),
             ),
           ),
 
@@ -69,7 +69,7 @@ void showContextMenu(BuildContext context,
             child: GestureDetector(
               onTap: () async {
                 await controller.reverse();
-                _overlayEntry?.remove();
+                overlayEntry?.remove();
               },
               child: Container(color: Colors.transparent),
             ),
@@ -90,11 +90,12 @@ void showContextMenu(BuildContext context,
                   height: 120,
                   child: MyFolderButton(
                     folderName: parsedFolderName,
-                    backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                    // backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                    backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(51),
                     data: data,
                     onTap: () {
                       controller.dispose();
-                      _overlayEntry?.remove();
+                      overlayEntry?.remove();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -151,14 +152,14 @@ void showContextMenu(BuildContext context,
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
-                                List<dynamic> folderImages = await _authService.fetchImages(data["name"]);
+                                List<dynamic> folderImages = await authService.fetchImages(data["name"]);
                                 List<Uint8List> savedImages = [];
                                 for (var i = 0; i < folderImages.length; i++){
                                   savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));
                                 }
                                 if (savedImages.isNotEmpty) shareImages(savedImages);
                                 await controller.reverse();
-                                _overlayEntry?.remove();
+                                overlayEntry?.remove();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('Folder is empty!')),
                                 );
@@ -186,7 +187,7 @@ void showContextMenu(BuildContext context,
                         ],),
                         onTap: () async {
                           await controller.reverse();
-                          _overlayEntry?.remove();
+                          overlayEntry?.remove();
                           showInfoModal(context, data);
                         },
                       ),
@@ -199,7 +200,7 @@ void showContextMenu(BuildContext context,
                         ],),
                         onTap: () async {
                           await controller.reverse();
-                          _overlayEntry?.remove();
+                          overlayEntry?.remove();
                           
                           final result = await showDialog<bool>(
                             context: context,
@@ -230,7 +231,7 @@ void showContextMenu(BuildContext context,
                         ],),
                         onTap: () async {
                           await controller.reverse();
-                          _overlayEntry?.remove();
+                          overlayEntry?.remove();
                           final result = await showDialog<bool>(
                             context: context,
                             builder: (context) => MyDeleteDialog(folderName: data["name"]),
@@ -252,6 +253,6 @@ void showContextMenu(BuildContext context,
     },
   );
 
-  Overlay.of(context).insert(_overlayEntry);
+  Overlay.of(context).insert(overlayEntry);
   controller.forward();
 }

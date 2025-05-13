@@ -135,7 +135,7 @@ class _ImageScreenState extends State<ImageScreen> {
                               PageRouteBuilder(
                                 pageBuilder: (context, animation, secondaryAnimation) => MyImageGallery(
                                   images: futureImages,
-                                  current_img: index,
+                                  currentImg: index,
                                 ),
                                 transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                   return FadeTransition(

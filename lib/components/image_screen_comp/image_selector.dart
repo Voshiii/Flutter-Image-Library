@@ -8,7 +8,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 class ImageSelectorDialog extends StatefulWidget {
   final String folderName;
 
-  ImageSelectorDialog({required this.folderName});
+  const ImageSelectorDialog({super.key, required this.folderName});
 
   @override
   _ImageSelectorDialogState createState() => _ImageSelectorDialogState();
@@ -171,7 +171,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                   if (_selectedFile != null && !_isUploading) {
                     try {
       
-                      final bool _success = await uploadService.uploadFile(
+                      final bool success = await uploadService.uploadFile(
                         file: _selectedFile!,
                         folderName: widget.folderName,
                         imageName: filePath,
@@ -187,7 +187,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                         _isUploading = false;
                       });
       
-                      _success
+                      success
                       ? ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Image uploaded successfully!')),
                       )

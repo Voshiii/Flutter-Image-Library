@@ -10,7 +10,7 @@ class MyImagePopUp extends StatefulWidget {
   final String imgName;
   final Future<void> Function()? reloadImages;
 
-  MyImagePopUp({
+  const MyImagePopUp({
     super.key, 
     required this.folderName,
     required this.img,

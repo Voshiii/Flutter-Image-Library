@@ -5,7 +5,7 @@ import 'package:photo_album/auth/auth.dart';
 class PopUpRenameFolder extends StatefulWidget {
   final String oldFolderName;
 
-  PopUpRenameFolder({
+  const PopUpRenameFolder({
     super.key,
     required this.oldFolderName,
   });

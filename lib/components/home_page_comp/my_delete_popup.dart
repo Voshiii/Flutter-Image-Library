@@ -6,7 +6,7 @@ import 'package:photo_album/auth/auth.dart';
 class MyDeleteDialog extends StatefulWidget {
   final String folderName;
 
-  const MyDeleteDialog({
+  const MyDeleteDialog({super.key, 
     required this.folderName,
   }); // Constructor
 
