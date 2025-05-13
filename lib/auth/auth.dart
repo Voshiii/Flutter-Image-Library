@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:photo_album/pages/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:photo_album/services/fetch_service.dart';
 
 // TO-DO: SPLIT THIS UP INTO ITS OWN FILES
 
@@ -59,7 +60,7 @@ class AuthService {
       await saveCredentials(username, password);
 
       // final responseData = getFolders();
-      final responseData = fetchInstantFolder();
+      final responseData = FetchService().fetchInstantFolder();
       await Future.delayed(Duration(seconds: 2));
 
       Navigator.pushReplacement(
@@ -94,192 +95,7 @@ class AuthService {
     ],
 
   );
-
-
-  final StreamController<List<dynamic>> _folderController = StreamController<List<dynamic>>();
-
-  Stream<List<dynamic>> fetchInstantFolder() {
-    // Start fetching instantly
-    getFolders();
-    return _folderController.stream;
-  }
-
-  Future<void> getFolders() async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    try{
-      // Send a GET request
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': basicAuth,
-          'Content-Type': 'application/json',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        // Parse the response
-        final List<dynamic> data = jsonDecode(response.body)["folders"];
-        _folderController.add(data);
-      } 
-      else {
-        print("Error occured while trying to fetch folders!");
-        // throw Exception('Failed to load folders');
-        _folderController.add([]);
-      }
-    }
-    catch(e){
-      print("Exception: $e");
-      _folderController.add([]);
-    }
-  }
-
-  Future<bool> renameFolder(String oldFolderName, String newFolderName) async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-    
-    // Send a PUT request
-    final response = await http.put(
-      url,
-      headers: {
-        'Authorization': basicAuth,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'oldFolderName': oldFolderName,
-        'newFolderName': newFolderName,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      return true;
-    }
-    else{
-      return false;
-    }
-  }
-
-  // Change to "fetchFiles"
-  Future<List<dynamic>> fetchImages(String folderName) async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    // Send a GET request
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': basicAuth,
-        // 'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
-        'Content-Type': 'image/jpeg',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<dynamic>.from(data['images']);
-    }
-    else{
-      return [];
-    }
-  }
-
-  void addFolder(String folderName) async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    // Send a POST request
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': basicAuth,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'folderName': folderName,
-      }),
-    );
-
-    // To-DO: ADD A SUCCESS SCREEN
-    if (response.statusCode == 200) {
-      print("Success!");
-    }
-    else{
-      // return [];
-      print("Error updating");
-      // return [];
-    }
-  }
-
-  Future<dynamic> deleteFolder(String folderName) async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    // Send a POST request
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': basicAuth,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'folderName': folderName,
-      }),
-    );
-
-    // ADD A SUCCESS SCREEN
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data;
-      // return List<String>.from(data['images']);
-    }
-    else{
-      print("Error Deleting");
-      return {};
-      // return [];
-    }
-  }
-
-
-  Future<void> deleteImage(String folderName, String imgName) async {
-    String? username = await getUsername();
-    String? password = await getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    // Send a POST request
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': basicAuth,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'folderName': folderName,
-        'fileName': imgName,
-      }),
-    );
-
-    // To-Do: ADD A SUCCESS SCREEN
-    if (response.statusCode == 200) {
-      print("Success!");
-    }
-    else{
-      print("Error Deleting");
-      // return [];
-    }
-  }
-
+  
 }
 
 

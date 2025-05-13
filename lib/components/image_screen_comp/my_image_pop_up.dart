@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/services/delete_service.dart';
 
 class MyImagePopUp extends StatefulWidget {
   final String folderName;
@@ -23,7 +23,7 @@ class MyImagePopUp extends StatefulWidget {
 }
 
 class _MyDeleteDialogState extends State<MyImagePopUp> {
-  final AuthService _authService = AuthService();
+  final DeleteService _deleteService = DeleteService();
   dynamic data;
   bool _isdeleting = false;
 
@@ -54,7 +54,7 @@ class _MyDeleteDialogState extends State<MyImagePopUp> {
                       _isdeleting = true;
                     });
 
-                    await _authService.deleteImage(widget.folderName, widget.imgName);
+                    await _deleteService.deleteImage(widget.folderName, widget.imgName);
                     await widget.reloadImages?.call();
                     await Future.delayed(Duration(seconds: 1));
                     setState(() {

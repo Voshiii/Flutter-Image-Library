@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/services/upload_service.dart';
 
 class PopUpRenameFolder extends StatefulWidget {
   final String oldFolderName;
 
-  const PopUpRenameFolder({
+   const PopUpRenameFolder({
     super.key,
     required this.oldFolderName,
   });
@@ -16,7 +16,7 @@ class PopUpRenameFolder extends StatefulWidget {
 
 class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
   final TextEditingController _textController = TextEditingController();
-  final AuthService _authService = AuthService();
+  final UploadService _uploadService = UploadService();
   bool _isCancelEnabled = false;
 
   @override
@@ -75,12 +75,14 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
           onPressed: !_isCancelEnabled
           ? null
           : () async {
-            final bool result = await _authService.renameFolder(widget.oldFolderName, _textController.text);
+            final bool result = await _uploadService.renameFolder(widget.oldFolderName, _textController.text);
+
             if (result == false) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Failed to rename folder!')),
               );
             }
+
             Navigator.of(context).pop(result);
           },
           child: Text(

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/home_page_comp/folder_button.dart';
 import 'package:photo_album/components/home_page_comp/no_internet.dart';
 import 'package:photo_album/components/home_page_comp/pop_up_add_folder.dart';
 import 'package:photo_album/pages/image_screen.dart';
 import 'package:photo_album/pages/settings_screen.dart';
+import 'package:photo_album/services/fetch_service.dart';
 import 'package:rive/rive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:photo_album/components/home_page_comp/folder_on_hold_popup.dart';
@@ -27,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomescreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
+  final FetchService _fetchService = FetchService();
   bool hasInternet = true;
 
   final TextEditingController _searchController = TextEditingController();
@@ -60,8 +60,8 @@ class _HomescreenState extends State<HomeScreen> {
 
   Future<void> refreshFolders() async {
     if (!mounted) return;
+    await _fetchService.getFolders();
     setState(() {
-      widget.folderStream = _authService.fetchInstantFolder();
       _allFolders = [];
       _filteredFolders = [];
     });
@@ -69,7 +69,7 @@ class _HomescreenState extends State<HomeScreen> {
   }
 
   String getParsedFolderName(String folderName){
-    if (folderName.length > 15){
+    if (folderName.length > 12){
       return "${folderName.substring(0, 6)}...${folderName.substring(folderName.length - 5)}";
     }
     return folderName;
@@ -80,7 +80,8 @@ class _HomescreenState extends State<HomeScreen> {
     OverlayEntry? overlayEntry;
 
     return StreamBuilder<List<dynamic>>(
-      stream: widget.folderStream,
+      // stream: widget.folderStream,
+      stream: _fetchService.fetchInstantFolder(),
       builder: (context, snapshot) {
         if(!hasInternet){
           return Column(
@@ -192,7 +193,7 @@ class _HomescreenState extends State<HomeScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ImageScreen(folderName: parsedFolderName),
+                                        builder: (context) => ImageScreen(folderName: _filteredFolders[index]["name"]),
                                       ),
                                     );
                                   },

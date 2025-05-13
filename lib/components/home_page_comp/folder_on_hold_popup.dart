@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/home_page_comp/folder_button.dart';
 import 'package:photo_album/components/home_page_comp/info_modal.dart';
 import 'package:photo_album/components/home_page_comp/my_delete_popup.dart';
 import 'package:photo_album/components/home_page_comp/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
+import 'package:photo_album/services/fetch_service.dart';
 import 'package:photo_album/services/share_img.dart';
 
 
@@ -21,7 +21,7 @@ void showContextMenu(BuildContext context,
     String parsedFolderName,
   ){
   final screenSize = MediaQuery.of(context).size;
-  final AuthService authService = AuthService();
+  final FetchService _fetchService = FetchService();
 
   // Safe margin
   final popupWidth = 160.0;
@@ -152,7 +152,7 @@ void showContextMenu(BuildContext context,
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
-                                List<dynamic> folderImages = await authService.fetchImages(data["name"]);
+                                List<dynamic> folderImages = await _fetchService.fetchImages(data["name"]);
                                 List<Uint8List> savedImages = [];
                                 for (var i = 0; i < folderImages.length; i++){
                                   savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));

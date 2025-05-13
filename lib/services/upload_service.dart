@@ -54,4 +54,65 @@ class UploadService {
   void cancelUpload() {
     _cancelToken?.cancel("Upload cancelled by user");
   }
+
+  void addFolder(String folderName) async {
+    String? username = await AuthService.getUsername();
+    String? password = await AuthService.getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+
+    // Send a POST request
+    try {
+      await _dio.post(
+        url.toString(),
+        data: jsonEncode({
+          'folderName': folderName,
+        }),
+        options: Options(
+          headers: {'Authorization': basicAuth},
+        ),
+        cancelToken: _cancelToken,
+      );
+    } 
+    catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        print("Error!");
+      } else {
+        print("Upload failed: $e");
+      }
+    }
+  }
+
+  Future<bool> renameFolder(String oldFolderName, String newFolderName) async {
+    String? username = await AuthService.getUsername();
+    String? password = await AuthService.getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    
+    // Send a PUT request
+    try {
+      await _dio.put(
+        url.toString(),
+        data: jsonEncode({
+        'oldFolderName': oldFolderName,
+        'newFolderName': newFolderName,
+      }),
+        options: Options(
+          headers: {'Authorization': basicAuth},
+        ),
+        cancelToken: _cancelToken,
+      );
+      return true;
+    } 
+    catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        return false;
+      } else {
+        print("Upload failed: $e");
+        return false;
+      }
+    }
+
+  }
+
 }

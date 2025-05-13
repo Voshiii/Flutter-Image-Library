@@ -1,7 +1,6 @@
 // import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/services/delete_service.dart';
 
 class MyDeleteDialog extends StatefulWidget {
   final String folderName;
@@ -15,7 +14,8 @@ class MyDeleteDialog extends StatefulWidget {
 }
 
 class _MyDeleteDialogState extends State<MyDeleteDialog> {
-  final AuthService _authService = AuthService();
+  // final AuthService _authService = AuthService();
+  final DeleteService _deleteService = DeleteService();
   dynamic data;
 
   @override
@@ -57,7 +57,8 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
               child: TextButton(
                 onPressed: ()  {
                   // Code to delete folder
-                  _authService.deleteFolder(widget.folderName).then((data) {
+                  // _authService.deleteFolder(widget.folderName).then((data) {
+                  _deleteService.deleteFolder(widget.folderName).then((data) {
                     if (data != null && data.isNotEmpty && !data["success"]) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Error deleting folder! Folder must be empty.')),

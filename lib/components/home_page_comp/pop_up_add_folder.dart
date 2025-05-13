@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/services/upload_service.dart';
 
 class PopUpAddFolder extends StatefulWidget {
 
@@ -14,7 +14,7 @@ class PopUpAddFolder extends StatefulWidget {
 
 class _PopUpAddFolderState extends State<PopUpAddFolder> {
   final TextEditingController _textController = TextEditingController();
-  final AuthService _authService = AuthService();
+  final UploadService _uploadService = UploadService();
   bool _isCancelEnabled = false;
 
   @override
@@ -69,7 +69,7 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
           onPressed: _textController.text.trim().isEmpty
           ? null
           : () async {
-            _authService.addFolder(_textController.text);
+            _uploadService.addFolder(_textController.text);
             Navigator.of(context).pop(true);
           },
           child: Text(

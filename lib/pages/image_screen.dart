@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/image_screen_comp/empty_folder_anim.dart';
 import 'package:photo_album/components/image_screen_comp/image_gallery.dart';
 import 'package:photo_album/components/image_screen_comp/image_viewer.dart';
@@ -8,6 +7,7 @@ import 'package:photo_album/components/image_screen_comp/my_image_pop_up.dart';
 import 'dart:convert';
 
 import 'package:photo_album/components/image_screen_comp/image_selector.dart';
+import 'package:photo_album/services/fetch_service.dart';
 
 class ImageScreen extends StatefulWidget {
   final String folderName;
@@ -21,7 +21,7 @@ class ImageScreen extends StatefulWidget {
 }
 
 class _ImageScreenState extends State<ImageScreen> {
-  final AuthService _authService = AuthService();
+  final FetchService _fetchService = FetchService();
   String? username;
   String? password;
 
@@ -45,7 +45,7 @@ class _ImageScreenState extends State<ImageScreen> {
   }
 
   void _loadImages() async {
-    futureImages = await _authService.fetchImages(widget.folderName);
+    futureImages = await _fetchService.fetchImages(widget.folderName);
     if (!mounted) return;
     setState(() {}); // Trigger a rebuild with the new data
     _isLoading = false;

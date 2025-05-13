@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/pages/home_screen.dart';
 import 'package:photo_album/pages/login.dart';
+import 'package:photo_album/services/fetch_service.dart';
 
 class MySplashScreen extends StatefulWidget {
   const MySplashScreen({super.key});
@@ -13,7 +14,7 @@ class MySplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<MySplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  final AuthService _authService = AuthService();
+  final FetchService _fetchService = FetchService();
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _SplashScreenState extends State<MySplashScreen> with SingleTickerProvider
     }
     else{
       // Start fetching data immediately
-      Stream<List<dynamic>> responseData = _authService.fetchInstantFolder();
+      Stream<List<dynamic>> responseData = _fetchService.fetchInstantFolder();
 
       // Wait for animation to finish too
       await Future.delayed(Duration(seconds: 2));
