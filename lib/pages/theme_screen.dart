@@ -16,12 +16,14 @@ class _MyThemePageState extends State<MyThemePage> {
     {"label": "Same as device", "value": "device"},
   ];
 
-  late String currentTheme;
+  String currentTheme = "";
 
   @override
   void initState() {
     super.initState();
-    _loadTheme();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTheme();
+    });
   }
 
   void _loadTheme() async {
@@ -31,7 +33,6 @@ class _MyThemePageState extends State<MyThemePage> {
 
   @override
   Widget build(BuildContext context) {
-    // final currentTheme = Provider.of<ThemeProvider>(context).getCurrentTheme();
 
     return Scaffold(
       appBar: AppBar(title: Text("Theme")),

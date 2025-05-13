@@ -154,6 +154,9 @@ class _HomescreenState extends State<HomeScreen> {
                   placeholder: 'Search folders...',
                   prefixIcon: Icon(Icons.search),
                   suffixIcon: Icon(Icons.clear),
+                  style: TextStyle(color: CupertinoTheme.of(context).brightness == Brightness.dark
+                    ? CupertinoColors.white
+                    : CupertinoColors.black,),
                 ),
               ),
           
