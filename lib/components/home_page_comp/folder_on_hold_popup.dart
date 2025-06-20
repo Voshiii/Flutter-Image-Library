@@ -87,13 +87,10 @@ void showContextMenu(BuildContext context,
               child: Material(
                 color: Colors.transparent,
                 child: SizedBox(
-                  // width: 120,
-                  // height: 120,
                   width: size.width,
                   height: size.height,
                   child: MyFolderButton(
                     folderName: parsedFolderName,
-                    // backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
                     backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(51),
                     data: data,
                     onTap: () {

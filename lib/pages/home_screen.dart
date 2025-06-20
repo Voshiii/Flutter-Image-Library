@@ -75,9 +75,24 @@ class _HomescreenState extends State<HomeScreen> {
     return folderName;
   }
 
+  int getCrossAxisCount(double width) {
+  if (width >= 1024) {
+    // iPad width and bigger tablets
+    return 5;
+  } else if (width >= 600) {
+    // Large phones, small tablets
+    return 4;
+  } else {
+    // Phones in portrait (like iPhone)
+    return 3;
+  }
+}
 
   Widget _buildImageView() {
     OverlayEntry? overlayEntry;
+    final width = MediaQuery.of(context).size.width;
+    final _crossAxisCount = getCrossAxisCount(width);
+
 
     return StreamBuilder<List<dynamic>>(
       // stream: widget.folderStream,
@@ -165,7 +180,8 @@ class _HomescreenState extends State<HomeScreen> {
                   children: [
                     GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
+                        // crossAxisCount: 3,
+                        crossAxisCount: _crossAxisCount,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                       ),
@@ -177,14 +193,14 @@ class _HomescreenState extends State<HomeScreen> {
                           builder: (context) {
                             final layerLink = LayerLink();
                             final key = GlobalKey();
-                
+                                    
                             return GestureDetector(
                               key: key,
                               onLongPress: () {
                                 final renderBox = key.currentContext!.findRenderObject() as RenderBox;
                                 final position = renderBox.localToGlobal(Offset.zero);
                                 final size = renderBox.size;
-                
+                                    
                                 showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, _filteredFolders[index], parsedFolderName);
                               },
                               child: CompositedTransformTarget(
