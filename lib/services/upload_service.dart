@@ -31,7 +31,10 @@ class UploadService {
         url.toString(),
         data: formData,
         options: Options(
-          headers: {'Authorization': basicAuth},
+          headers: {
+            'Authorization': basicAuth,
+            'Content-Type': 'multipart/form-data',
+            },
         ),
         cancelToken: _cancelToken,
         onSendProgress: (int sent, int total) {
@@ -52,6 +55,7 @@ class UploadService {
   }
 
   void cancelUpload() {
+    print("Canelled by user....");
     _cancelToken?.cancel("Upload cancelled by user");
   }
 

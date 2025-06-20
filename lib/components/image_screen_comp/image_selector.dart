@@ -195,7 +195,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                         SnackBar(content: Text('Failed to upload!')),
                       );
       
-                      Navigator.of(context).pop(true);
+                      Navigator.of(context).pop(success);
                     }
                     catch(e){
                       // Handle any errors that may occur during upload

@@ -30,6 +30,7 @@ void showContextMenu(BuildContext context,
   // Clamp the position to keep the popup on-screen
   double dx = position.dx;
   double dy = position.dy+130;
+  // double dy = position.dy;
 
   // When popup goes over screen width
   if (dx + popupWidth > screenSize.width) {
@@ -86,8 +87,10 @@ void showContextMenu(BuildContext context,
               child: Material(
                 color: Colors.transparent,
                 child: SizedBox(
-                  width: 120,
-                  height: 120,
+                  // width: 120,
+                  // height: 120,
+                  width: size.width,
+                  height: size.height,
                   child: MyFolderButton(
                     folderName: parsedFolderName,
                     // backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
