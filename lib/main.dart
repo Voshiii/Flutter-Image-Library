@@ -13,14 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
 
-  // Initialize local notifications
-  // const AndroidInitializationSettings androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-  // const DarwinInitializationSettings iosInit = DarwinInitializationSettings();
-  // const InitializationSettings initSettings = InitializationSettings(
-  //   // android: androidInit,
-  //   iOS: iosInit,
-  // );
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -31,7 +23,6 @@ void main() async {
       )
     );
 
-    // await flutterLocalNotificationsPlugin.initialize(initSettings);
     initializeNotifications();
 
   });
