@@ -30,6 +30,8 @@ dependencies:
   page_transition: ^2.0.9
   async: ^2.11.0
   dio: ^5.4.0
+  video_player: ^2.5.1
+  flutter_local_notifications: ^17.1.2
 
 
 dev_dependencies:

@@ -47,9 +47,6 @@ class _MyImageGalleryState extends State<MyImageGallery> {
       // To-Do: Change how it closes
       onVerticalDragUpdate: (details) {
         updateDragVal(details);
-        // setState(() {
-        //   _verticalDrag += details.delta.dy;
-        // });
       },
       onVerticalDragEnd: (details) {
         if (_verticalDrag > 50) {

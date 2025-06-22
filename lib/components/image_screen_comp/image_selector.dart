@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_album/services/noti_service.dart';
 import 'dart:io';
 import 'package:photo_album/services/upload_service.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -22,6 +23,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
   bool _isUploading = false;
   
   UploadService uploadService = UploadService();
+  final NotiService _notiService = NotiService();
 
   bool isVideoFile(String path) {
     final ext = path.toLowerCase();
@@ -101,7 +103,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
     return PopScope(
       canPop: !_isUploading,
       child: AlertDialog(
-        title: Text("Select an Image"),
+        title: Text("Select a file"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -123,7 +125,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text("Select image", style: TextStyle(color: const Color.fromARGB(255, 44, 44, 44)),),
+                          Text("Select file", style: TextStyle(color: const Color.fromARGB(255, 44, 44, 44)),),
                           Icon(Icons.image, size: 50, color: Colors.grey),
                         ],
                       ),
@@ -194,6 +196,8 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                       : ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to upload!')),
                       );
+
+                      _notiService.fileUploaded(success);
       
                       Navigator.of(context).pop(success);
                     }
@@ -207,7 +211,7 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
                   else{
                     // Handle case where no image is selected
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('No image selected!')),
+                      SnackBar(content: Text('No file selected!')),
                     );
                   }
               

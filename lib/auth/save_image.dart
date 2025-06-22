@@ -19,6 +19,7 @@ Future<void> saveImageToGallery(String base64String) async {
     }
   } else {
     print("Permission denied.");
+    await requestPermission();
   }
 }
 

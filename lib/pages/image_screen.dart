@@ -25,6 +25,11 @@ class _ImageScreenState extends State<ImageScreen> {
   String? username;
   String? password;
 
+  double _scale = 1.0;                 // Current zoom scale factor
+  int _crossAxisCount = 2;             // Current grid column count (default 3)
+  final int minCrossAxisCount = 2;     // Minimum columns
+  final int maxCrossAxisCount = 6;     // Maximum columns
+
 
   bool _isLoading = true;
 
@@ -76,7 +81,7 @@ class _ImageScreenState extends State<ImageScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator( 
+      body: RefreshIndicator(
         onRefresh: refreshImages,
         child: AnimatedSwitcher(
           duration: Duration(milliseconds: 400),
@@ -98,61 +103,78 @@ class _ImageScreenState extends State<ImageScreen> {
                   ],
                 )
               )
-              : GridView.builder(
-                  key: ValueKey('grid'),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  padding: EdgeInsets.only(left: 12, right: 12),
-                  itemCount: futureImages.length,
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                      child: GestureDetector(
-                        onLongPress: () => {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => MyImagePopUp(
-                              folderName: widget.folderName,
-                              img: base64Decode(futureImages[index]['data'].split(',')[1]),
-                              imgName: futureImages[index]['name'],
-                              reloadImages: refreshImages,
-                            ),
-                          )
-                        },
-                        child: ImageViewer(
-                          img: base64Decode(futureImages[index]['data'].split(',')[1],), 
-                          onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => MyImageGallery(images: futureImages, current_img: index),
-                            //   ),
-                            // );
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder: (context, animation, secondaryAnimation) => MyImageGallery(
-                                  images: futureImages,
-                                  currentImg: index,
-                                ),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                                transitionDuration: Duration(milliseconds: 100), // Very fast fade
-                              ),
-                            );
-                          },
-                        ),
-                          
-                      ),
-                    );
+              : GestureDetector(
+                  onScaleUpdate: (details) {
+                    setState(() {
+                      // Update the scale with the relative scale from gesture, clamp so it stays reasonable
+                      final double zoomSensitivity = 0.3;  // smaller value = slower zoom
+                      _scale = (_scale * (1 + (details.scale - 1) * zoomSensitivity)).clamp(0.5, 3.0);
+
+                      // Calculate new crossAxisCount inversely proportional to _scale
+                      int newCount = (3 / _scale).round();
+
+                      // Clamp to min/max
+                      newCount = newCount.clamp(minCrossAxisCount, maxCrossAxisCount);
+
+                      if (newCount != _crossAxisCount) {
+                        _crossAxisCount = newCount;
+                      }
+                    });
                   },
-                ),
+                  onScaleStart: (_) {
+                    // Optionally reset or handle scale start
+                    // _scale = 1.0;
+                  },
+                child: GridView.builder(
+                    key: ValueKey('grid'),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: _crossAxisCount,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    padding: EdgeInsets.only(left: 12, right: 12),
+                    itemCount: futureImages.length,
+                    itemBuilder: (context, index) {
+                      return ClipRRect(
+                        child: GestureDetector(
+                          onLongPress: () => {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => MyImagePopUp(
+                                folderName: widget.folderName,
+                                img: base64Decode(futureImages[index]['data'].split(',')[1]),
+                                imgName: futureImages[index]['name'],
+                                reloadImages: refreshImages,
+                              ),
+                            )
+                          },
+                          child: ImageViewer(
+                            img: base64Decode(futureImages[index]['data'].split(',')[1],), 
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation, secondaryAnimation) => MyImageGallery(
+                                    images: futureImages,
+                                    currentImg: index,
+                                  ),
+                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                  transitionDuration: Duration(milliseconds: 100), // Very fast fade
+                                ),
+                              );
+                            },
+                          ),
+                            
+                        ),
+                      );
+                    },
+                  ),
+              ),
         ),
       )
     );
