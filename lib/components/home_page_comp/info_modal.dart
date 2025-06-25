@@ -106,15 +106,20 @@ Widget infoList(dynamic data) {
 }
 
 String _roundValue(int bytes) {
-  double megaBytes = bytes / 1000000;
-  megaBytes = double.parse(megaBytes.toStringAsFixed(1));
-  String amount = '${megaBytes.toString()} MB';
-  if(megaBytes > 1000){
-    megaBytes /= 10;
-    amount = '${megaBytes.toString()} GB';
+  double mb = bytes / 1e6;
+  String bts = bytes > 99999999 ? '' : '$bytes bytes';
+  String amount;
+
+  if (mb >= 1e6) {
+    amount = '${(mb / 1e6).toStringAsFixed(2)} TB';
+  } else if (mb >= 1e3) {
+    amount = '${(mb / 1e3).toStringAsFixed(2)} GB';
+  } else {
+    amount = '${mb.toStringAsFixed(2)} MB';
   }
 
-  return '$bytes bytes ($amount)';
+  // return '$bts bytes ($amount)';
+  return '$bts ($amount)';
 }
 
 String _formatDate(String serverDate) {
