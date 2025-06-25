@@ -137,46 +137,46 @@ class FetchService {
 
 
   // Change to "fetchFiles"
-  // Future<List<dynamic>> fetchImages(String folderName) async {
-  //   String? username = await AuthService.getUsername();
-  //   String? password = await AuthService.getPassword();
-  //   Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-  //   String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  Future<List<dynamic>> fetchAllFiles(String folderName) async {
+    String? username = await AuthService.getUsername();
+    String? password = await AuthService.getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads/$folderName/ALL');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
 
-  //   // Send a GET request
-  //   try {
-  //     final response = await _dio.get(
-  //       url.toString(),
-  //       options: Options(
-  //         headers: {
-  //           'Authorization': basicAuth,
-  //           'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
-  //         },
-  //         responseType: ResponseType.bytes,
-  //       ),
-  //       cancelToken: _cancelToken,
-  //     );
+    // Send a GET request
+    try {
+      final response = await _dio.get(
+        url.toString(),
+        options: Options(
+          headers: {
+            'Authorization': basicAuth,
+            'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
+          },
+          responseType: ResponseType.bytes,
+        ),
+        cancelToken: _cancelToken,
+      );
 
-  //     if(response.statusCode == 204){
-  //       return [];
-  //     }
+      if(response.statusCode == 204){
+        return [];
+      }
 
-  //     final Uint8List bytes = response.data;
-  //     final String jsonString = utf8.decode(bytes);
-  //     final Map<String, dynamic> data = jsonDecode(jsonString);
+      final Uint8List bytes = response.data;
+      final String jsonString = utf8.decode(bytes);
+      final Map<String, dynamic> data = jsonDecode(jsonString);
 
-  //     return List<dynamic>.from(data['images']);
-  //   } 
-  //   catch (e) {
-  //     if (e is DioException && CancelToken.isCancel(e)) {
-  //       print("Error!");
-  //       return [];
-  //     } else {
-  //       print("Fetch failed: $e");
-  //       return [];
-  //     }
-  //   }
-  // }
+      return List<dynamic>.from(data['images']);
+    } 
+    catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        print("Error!");
+        return [];
+      } else {
+        print("Fetch failed: $e");
+        return [];
+      }
+    }
+  }
 
    
   void cancelUpload() {

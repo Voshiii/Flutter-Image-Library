@@ -1,5 +1,5 @@
-// import 'dart:convert';
-// import 'dart:typed_data';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/home_page_comp/folder_button.dart';
@@ -8,7 +8,7 @@ import 'package:photo_album/components/home_page_comp/my_delete_popup.dart';
 import 'package:photo_album/components/home_page_comp/rename_folder_dialog.dart';
 import 'package:photo_album/pages/image_screen.dart';
 import 'package:photo_album/services/fetch_service.dart';
-// import 'package:photo_album/services/share_img.dart';
+import 'package:photo_album/services/share_img.dart';
 
 
 void showContextMenu(BuildContext context, 
@@ -149,33 +149,35 @@ void showContextMenu(BuildContext context,
                             ),
                           ),
                           
-                          // Expanded(
-                          //   child: GestureDetector(
-                          //     onTap: () async {
-                          //       List<dynamic> folderImages = await _fetchService.fetchImages(data["name"]);
-                          //       List<Uint8List> savedImages = [];
-                          //       for (var i = 0; i < folderImages.length; i++){
-                          //         savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));
-                          //       }
-                          //       if (savedImages.isNotEmpty) shareImages(savedImages);
-                          //       await controller.reverse();
-                          //       overlayEntry?.remove();
-                          //       ScaffoldMessenger.of(context).showSnackBar(
-                          //         SnackBar(content: Text('Folder is empty!')),
-                          //       );
-                          //     },
-                          //     behavior: HitTestBehavior.opaque,
-                          //     child: Column(
-                          //       children: [
-                          //         Icon(Icons.ios_share),
-                          //         Text(
-                          //           "Share",
-                          //           style: TextStyle(fontSize: 10),
-                          //         )
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () async {
+                                List<dynamic> folderImages = await _fetchService.fetchAllFiles(data["name"]);
+                                List<Uint8List> savedImages = [];
+                                for (var i = 0; i < folderImages.length; i++){
+                                  savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));
+                                }
+                                if (savedImages.isNotEmpty) shareImages(savedImages);
+                                await controller.reverse();
+                                overlayEntry?.remove();
+                                if (savedImages.isEmpty){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error occured!')),
+                                  );
+                                }
+                              },
+                              behavior: HitTestBehavior.opaque,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.ios_share),
+                                  Text(
+                                    "Share",
+                                    style: TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
                         ],),
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
