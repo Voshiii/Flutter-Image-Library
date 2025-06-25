@@ -1,11 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/image_screen_comp/empty_folder_anim.dart';
 import 'package:photo_album/components/image_screen_comp/image_gallery.dart';
 import 'package:photo_album/components/image_screen_comp/image_viewer.dart';
 import 'package:photo_album/components/image_screen_comp/loading_anim.dart';
 import 'package:photo_album/components/image_screen_comp/my_image_pop_up.dart';
-import 'dart:convert';
-
 import 'package:photo_album/components/image_screen_comp/image_selector.dart';
 import 'package:photo_album/services/fetch_service.dart';
 
@@ -50,7 +49,8 @@ class _ImageScreenState extends State<ImageScreen> {
   }
 
   void _loadImages() async {
-    futureImages = await _fetchService.fetchImages(widget.folderName);
+    futureImages = await _fetchService.fetchFileNames(widget.folderName);
+
     if (!mounted) return;
     setState(() {}); // Trigger a rebuild with the new data
     _isLoading = false;
@@ -135,42 +135,51 @@ class _ImageScreenState extends State<ImageScreen> {
                     padding: EdgeInsets.only(left: 12, right: 12),
                     itemCount: futureImages.length,
                     itemBuilder: (context, index) {
-                      return ClipRRect(
-                        child: GestureDetector(
-                          onLongPress: () => {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => MyImagePopUp(
-                                folderName: widget.folderName,
-                                img: base64Decode(futureImages[index]['data'].split(',')[1]),
-                                imgName: futureImages[index]['name'],
-                                reloadImages: refreshImages,
-                              ),
-                            )
-                          },
-                          child: ImageViewer(
-                            img: base64Decode(futureImages[index]['data'].split(',')[1],), 
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) => MyImageGallery(
-                                    images: futureImages,
-                                    currentImg: index,
+                      return FutureBuilder<Uint8List?>(
+                        future: _fetchService.fetchFile(widget.folderName, futureImages[index]),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError || snapshot.data == null) {
+                            return const Center(child: Icon(Icons.broken_image));
+                          }
+
+                          return ClipRRect(
+                            child: GestureDetector(
+                              onLongPress: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) => MyImagePopUp(
+                                    folderName: widget.folderName,
+                                    img: snapshot.data!,
+                                    imgName: futureImages[index],
+                                    reloadImages: refreshImages,
                                   ),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: child,
-                                    );
-                                  },
-                                  transitionDuration: Duration(milliseconds: 100), // Very fast fade
-                                ),
-                              );
-                            },
-                          ),
-                            
-                        ),
+                                );
+                              },
+                              child: ImageViewer(
+                                img: snapshot.data!,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation, secondaryAnimation) =>
+                                          MyImageGallery(
+                                        images: futureImages,
+                                        currentImg: index,
+                                        folderName: widget.folderName,
+                                      ),
+                                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                        return FadeTransition(opacity: animation, child: child);
+                                      },
+                                      transitionDuration: const Duration(milliseconds: 100),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

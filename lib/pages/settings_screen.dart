@@ -24,7 +24,7 @@ class MySettingsPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTile(context, title: 'Favorites (NOT IMPLEMENTED)', onTap: () {}),
+            // _buildTile(context, title: 'Favorites (NOT IMPLEMENTED)', onTap: () {}),
             _buildDivider(),
             _buildTile(context, title: 'Theme', onTap: () {
               Navigator.push(
@@ -36,7 +36,7 @@ class MySettingsPage extends StatelessWidget {
             _buildTile(context, title: 'Permissions', onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => MyThemePage()),
+                MaterialPageRoute(builder: (_) => Placeholder()),
               );
             }),
             _buildDivider(),

@@ -57,3 +57,40 @@ app.*.map.json
 build/
 # dist/
 *.log
+
+# Xcode user data (can contain Apple ID/email/team info)
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcworkspace/xcuserdata/
+
+# CocoaPods (generated)
+ios/Pods/
+
+# Flutter ephemeral files (not needed in repo)
+ios/.symlinks/
+macos/Flutter/ephemeral/
+
+# Xcode generated files
+*.xcuserstate
+*.xcscmblueprint
+*.xcsettings
+
+# iOS Xcode specific
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcworkspace/xcuserdata/
+ios/.symlinks/
+
+# Xcode auto-generated user-specific data
+*.xcuserstate
+*.xcscmblueprint
+*.xcsettings
+
+# macOS build files
+macos/Flutter/ephemeral/
+
+# Env files
+.env
+.env.*

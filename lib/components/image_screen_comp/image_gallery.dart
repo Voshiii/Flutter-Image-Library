@@ -1,17 +1,19 @@
-import 'dart:convert';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:photo_album/services/fetch_service.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:photo_view/photo_view.dart';
 
 class MyImageGallery extends StatefulWidget {
   final List<dynamic> images;
   final int currentImg;
+  final String folderName;
 
   const MyImageGallery({
     super.key,
     required this.images,
     required this.currentImg,
+    required this.folderName,
     });
 
   @override
@@ -21,7 +23,10 @@ class MyImageGallery extends StatefulWidget {
 class _MyImageGalleryState extends State<MyImageGallery> {
   late PageController _pageController;
   double _verticalDrag = 0;
-  // final PageController _pageController;
+
+  final FetchService _fetchService = FetchService();
+  final Map<String, Uint8List?> _imageCache = {};
+
 
   @override
   void initState() {
@@ -39,6 +44,18 @@ class _MyImageGalleryState extends State<MyImageGallery> {
     _verticalDrag += details.delta.dy;
   }
 
+  Future<Uint8List?> _loadImage(int index) async {
+    final imageInfo = widget.images[index]; // Item name
+    final key = imageInfo;
+
+    if (_imageCache.containsKey(key)) {
+      return _imageCache[key];
+    }
+
+    final bytes = await _fetchService.fetchFile(widget.folderName, imageInfo);
+    _imageCache[key] = bytes;
+    return bytes;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,20 +72,31 @@ class _MyImageGalleryState extends State<MyImageGallery> {
         _verticalDrag = 0; // Reset
       },
       child: PhotoViewGallery.builder(
-        itemCount: widget.images.length,
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: MemoryImage(base64Decode(widget.images[index]['data'].split(',')[1])), // Uses Image.memory
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered,
-          );
-        },
-        scrollPhysics: BouncingScrollPhysics(),
-        backgroundDecoration: BoxDecoration(
-          color: Colors.black,
-        ),
-        pageController: _pageController,
-      ),
+      itemCount: widget.images.length,
+      pageController: _pageController,
+      scrollPhysics: const BouncingScrollPhysics(),
+      backgroundDecoration: const BoxDecoration(color: Colors.black),
+      builder: (context, index) {
+        return PhotoViewGalleryPageOptions.customChild(
+          child: FutureBuilder<Uint8List?>(
+            future: _loadImage(index),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasData) {
+                return Image.memory(snapshot.data!, fit: BoxFit.contain);
+              } else {
+                return const Center(child: Text("Failed to load image", style: TextStyle(color: Colors.white)));
+              }
+            },
+          ),
+          minScale: PhotoViewComputedScale.contained,
+          maxScale: PhotoViewComputedScale.covered,
+        );
+      },
+    )
+
+
     );
   }
 }

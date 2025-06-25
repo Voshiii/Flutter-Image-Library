@@ -56,6 +56,85 @@ class FetchService {
     }
   }
  
+  Future<List<String>> fetchFileNames(String folderName) async {
+    String? username = await AuthService.getUsername();
+    String? password = await AuthService.getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+
+    try {
+      final response = await _dio.get(
+        url.toString(),
+        options: Options(
+          headers: {
+            'Authorization': basicAuth,
+          },
+          responseType: ResponseType.json,
+        ),
+        cancelToken: _cancelToken,
+      );
+
+      if(response.statusCode == 204){
+        return [];
+      }
+
+      final data = response.data;
+      return List<String>.from(data['folderItems']);
+    } 
+    catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        print("Error!");
+        return [];
+      } else {
+        print("Fetch failed: $e");
+        return [];
+      }
+    }
+
+
+  }
+
+
+  Future<Uint8List?> fetchFile(String folderName, String fileName) async {
+    String? username = await AuthService.getUsername();
+    String? password = await AuthService.getPassword();
+    Uri url = Uri.parse('$baseUrl/uploads/GET/$folderName/$fileName');
+    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+
+    // Send a GET request
+    try {
+      final response = await _dio.get(
+        url.toString(),
+        options: Options(
+          headers: {
+            'Authorization': basicAuth,
+            'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
+          },
+          responseType: ResponseType.json,
+        ),
+        cancelToken: _cancelToken,
+      );
+
+      if(response.statusCode == 204){
+        return null;
+      }
+
+      final String base64String = response.data['data'];
+      final String base64Clean = base64String.split(',')[1];
+
+      return base64Decode(base64Clean);
+    } 
+    catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        print("Error!");
+        return null;
+      } else {
+        print("Fetch failed: $e");
+        return null;
+      }
+    }
+  }
+
 
   // Change to "fetchFiles"
   Future<List<dynamic>> fetchImages(String folderName) async {
