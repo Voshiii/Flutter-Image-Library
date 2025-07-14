@@ -118,7 +118,6 @@ String _roundValue(int bytes) {
     amount = '${mb.toStringAsFixed(2)} MB';
   }
 
-  // return '$bts bytes ($amount)';
   return '$bts ($amount)';
 }
 

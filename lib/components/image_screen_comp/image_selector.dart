@@ -46,17 +46,6 @@ class _ImageSelectorDialogState extends State<ImageSelectorDialog> {
   }
 
   Future<void> _pickImage() async {
-    // NOT FULLY DONE YET:
-    // Make some optimization to send and retrieve video's -> loading bars
-    // When the user cancels, remove it from the server -> server side. Options:
-    
-    // Use a temporary location to store incoming uploads.
-    // Track upload state (e.g., store progress or session info).
-    // Set a timeout or cleanup job:
-    // If the upload doesn’t complete within a certain time, delete the partial file.
-    // Expose a cancel endpoint (optional):
-    // When the client cancels, it can also notify the server to delete the partial file (e.g., via a DELETE request with a unique ID).
-
     final picker = ImagePicker();
     final XFile? pickedFile = await picker.pickMedia();
 

@@ -8,11 +8,7 @@ import 'package:photo_album/pages/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_album/services/fetch_service.dart';
 
-// TO-DO: SPLIT THIS UP INTO ITS OWN FILES
-
 class AuthService {
-  static String? cachedUsername;
-  static String? cachedPassword;
   static final _storage = const FlutterSecureStorage();
   String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
