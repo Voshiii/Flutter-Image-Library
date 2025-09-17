@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/pages/login.dart';
+import 'package:photo_album/pages/login_screen.dart';
 
 class LogoutPopup extends StatelessWidget {  
   const LogoutPopup({super.key,});
@@ -22,12 +22,7 @@ class LogoutPopup extends StatelessWidget {
           ),
           onPressed: () => {
             AuthService.logout(),
-            // Navigator.pop(context),
-            // Navigator.pushAndRemoveUntil(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => LoginPage()),
-            //   (route) => false, // This removes all previous routes
-            // )
+            
             Navigator.pushAndRemoveUntil(
               context,
               PageRouteBuilder(
@@ -50,7 +45,7 @@ class LogoutPopup extends StatelessWidget {
         CupertinoDialogAction(
           child: Text(
             "No",
-            style: TextStyle(color: Colors.blue),
+            style: TextStyle(color: Theme.of(context).colorScheme.primary),
           ),
           onPressed: () => {
             Navigator.pop(context),
