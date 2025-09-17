@@ -4,10 +4,12 @@ import 'package:photo_album/services/upload_service.dart';
 
 class PopUpRenameFolder extends StatefulWidget {
   final String oldFolderName;
+  final String currentFolderPath;
 
    const PopUpRenameFolder({
     super.key,
     required this.oldFolderName,
+    required this.currentFolderPath,
   });
 
   @override
@@ -75,8 +77,8 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
           onPressed: !_isCancelEnabled
           ? null
           : () async {
-            final bool result = await _uploadService.renameFolder(widget.oldFolderName, _textController.text);
-
+            final bool result = await _uploadService.renameItem(widget.oldFolderName, _textController.text, widget.currentFolderPath);
+            if(!context.mounted) return;
             if (result == false) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Failed to rename folder!')),
@@ -88,7 +90,7 @@ class _PopUpRenameFolderState extends State<PopUpRenameFolder> {
           child: Text(
             "Ok",
             style: _isCancelEnabled
-            ? TextStyle(color: Colors.blue)
+            ? TextStyle(color: Theme.of(context).colorScheme.primary)
             : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
           ),
         ),

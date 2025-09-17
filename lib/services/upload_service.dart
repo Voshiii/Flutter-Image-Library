@@ -3,36 +3,34 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/auth/dio.dart';
 
 class UploadService {
-  final Dio _dio = Dio();
   CancelToken? _cancelToken;
   String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   Future<bool> uploadFile({
     required File file, 
-    required String folderName, 
+    required String folderPath, 
     required String imageName, 
-    required Function(double) onProgress
+    required Function(double) onProgress,
   }) async {
     _cancelToken = CancelToken();
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    final username = await AuthService.getUsername();
+    Uri url = Uri.parse('$baseUrl/uploads/item/$username');
 
     try {
       FormData formData = FormData.fromMap({
         'fileName': imageName,
         'file': await MultipartFile.fromFile(file.path, filename: imageName),
+        'folderPath': folderPath,
       });
 
-      await _dio.post(
+      await Api.dio.post(
         url.toString(),
         data: formData,
         options: Options(
           headers: {
-            'Authorization': basicAuth,
             'Content-Type': 'multipart/form-data',
             },
         ),
@@ -54,55 +52,50 @@ class UploadService {
     }
   }
 
+// ! GET BACK TO THIS: MAKE SURE TO ONLY UPLOAD TO THE CORRECT USER, NO OTHER USER CAN UPLOAD TO THE USERNAME
   void cancelUpload() {
     print("Canelled by user....");
     _cancelToken?.cancel("Upload cancelled by user");
   }
 
-  void addFolder(String folderName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  void addFolder(String folderName, String folderPath) async {
+    final username = await AuthService.getUsername();
+    Uri url = Uri.parse('$baseUrl/uploads/$username');
 
-    // Send a POST request
-    try {
-      await _dio.post(
-        url.toString(),
-        data: jsonEncode({
-          'folderName': folderName,
-        }),
-        options: Options(
-          headers: {'Authorization': basicAuth},
-        ),
-        cancelToken: _cancelToken,
-      );
-    } 
-    catch (e) {
-      if (e is DioException && CancelToken.isCancel(e)) {
-        print("Error!");
-      } else {
-        print("Upload failed: $e");
-      }
-    }
+    final data = {
+      'folderName': folderName,
+      'folderPath': folderPath,
+    };
+
+    await Api.dio.post(
+      url.toString(),
+      data: data,
+      options: Options(
+        headers: { 
+          'Content-Type': 'application/json',
+        }
+      ),
+    );
   }
 
-  Future<bool> renameFolder(String oldFolderName, String newFolderName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  // ? Put this in another file?
+  Future<bool> renameItem(String oldItemName, String newItemName, String folderPath) async {
+    final username = await AuthService.getUsername();
+    Uri url = Uri.parse('$baseUrl/uploads/$username/rename');
     
     // Send a PUT request
     try {
-      await _dio.put(
+      await Api.dio.put(
         url.toString(),
         data: jsonEncode({
-        'oldFolderName': oldFolderName,
-        'newFolderName': newFolderName,
+        'oldItemName': oldItemName,
+        'newItemName': newItemName,
+        'folderPath': folderPath,
       }),
         options: Options(
-          headers: {'Authorization': basicAuth},
+          headers: {
+            'Content-Type': 'application/json',
+          }
         ),
         cancelToken: _cancelToken,
       );
@@ -112,11 +105,10 @@ class UploadService {
       if (e is DioException && CancelToken.isCancel(e)) {
         return false;
       } else {
-        print("Upload failed: $e");
+        print("Rename failed: $e");
         return false;
       }
     }
-
   }
 
 }

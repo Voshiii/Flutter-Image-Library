@@ -1,22 +1,31 @@
-// import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:photo_album/services/delete_service.dart';
 
 class MyDeleteDialog extends StatefulWidget {
-  final String folderName;
+  final String fileName;
+  final String filePath;
 
   const MyDeleteDialog({super.key, 
-    required this.folderName,
-  }); // Constructor
+    required this.fileName,
+    required this.filePath,
+  });
 
   @override
-  _MyDeleteDialogState createState() => _MyDeleteDialogState();
+  MyDeleteDialogState createState() => MyDeleteDialogState();
 }
 
-class _MyDeleteDialogState extends State<MyDeleteDialog> {
-  // final AuthService _authService = AuthService();
+class MyDeleteDialogState extends State<MyDeleteDialog> {
   final DeleteService _deleteService = DeleteService();
   dynamic data;
+
+  removeExt(String fileName){
+    if (fileName.endsWith('.enc')) {
+      return fileName.substring(0, fileName.length - 4); // remove ".enc"
+    }
+    return fileName;
+  }
+
+  bool isFile(String name) => name.contains('.') && !name.startsWith('.');
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +37,16 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: "Are you sure you want to delete folder ",
-                    style: TextStyle(fontWeight: FontWeight.normal), // Normal style
+                    text: "Are you sure you want to delete ",
+                    style: TextStyle(fontWeight: FontWeight.normal),
                   ),
                   TextSpan(
-                    text: widget.folderName,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22,), // Bold style
+                    text: removeExt(widget.fileName),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22,),
                   ),
                   TextSpan(
                     text: "?",
-                    style: TextStyle(fontWeight: FontWeight.normal), // Normal style
+                    style: TextStyle(fontWeight: FontWeight.normal),
                   ),
                 ],
               ),),
@@ -53,25 +62,32 @@ class _MyDeleteDialogState extends State<MyDeleteDialog> {
                 color: const Color.fromARGB(255, 214, 214, 214),
                 borderRadius: BorderRadius.circular(10),  
               ),
-              // padding: EdgeInsets.only(left: 20, right: 20),
               child: TextButton(
-                onPressed: ()  {
-                  // Code to delete folder
-                  // _authService.deleteFolder(widget.folderName).then((data) {
-                  _deleteService.deleteFolder(widget.folderName).then((data) {
-                    if (data != null && data.isNotEmpty && !data["success"]) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error deleting folder! Folder must be empty.')),
-                      );
-                      Navigator.of(context).pop();
-                    } 
-                    else {
-                      if (mounted) {
-                        Navigator.of(context).pop(true); // Close the dialog if successful
-                      }
-                    }
-                  });
+                onPressed: () async {
+                  if (!isFile(widget.fileName)) {
+                    // FOLDER DELETION
+                    await _deleteService.deleteFolder("${widget.filePath}/${widget.fileName}").then((data) {
+                      if (!context.mounted) return;
 
+                      if (data != null && data.isNotEmpty && !data["success"]) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Error deleting folder! Folder must be empty.')),
+                        );
+                        Navigator.of(context).pop(false);
+                      } else {
+                        if (context.mounted) {
+                          Navigator.of(context).pop(true); // Close the dialog if successful
+                        }
+                      }
+                    });
+                  } else {
+                    // FILE DELETION
+                    await _deleteService.deleteFile(widget.filePath, widget.fileName);
+                    await Future.delayed(const Duration(seconds: 1));
+
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 child: Text(
                   "Delete",

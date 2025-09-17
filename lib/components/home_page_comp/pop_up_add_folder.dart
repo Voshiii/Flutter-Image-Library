@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:photo_album/services/upload_service.dart';
 
 class PopUpAddFolder extends StatefulWidget {
+  final String currentFolderPath;
+
 
   const PopUpAddFolder({
     super.key,
+    required this.currentFolderPath,
   });
 
   @override
@@ -15,7 +18,7 @@ class PopUpAddFolder extends StatefulWidget {
 class _PopUpAddFolderState extends State<PopUpAddFolder> {
   final TextEditingController _textController = TextEditingController();
   final UploadService _uploadService = UploadService();
-  bool _isCancelEnabled = false;
+  bool _isTextValid = false;
 
   @override
   void initState() {
@@ -30,8 +33,17 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
   }
 
   void _handleTextChanged() {
+    final text = _textController.text.trim();
+
+    // regex checks if text contains any of: \ / . , ' " ; : < > ( ) { } [ ] |
+    final forbiddenPattern = RegExp(r'''[\\/.,'" ;:<>(){}\[\]\|]''');
     setState(() {
-      _isCancelEnabled = _textController.text.trim().isNotEmpty;
+      if (forbiddenPattern.hasMatch(text)) {
+        _isTextValid = false;
+      }
+      else{
+        _isTextValid = _textController.text.trim().isNotEmpty;
+      }
     });
   }
 
@@ -43,8 +55,11 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
         "Folder name",
         style: TextStyle(fontSize: 22),
       ),
+
+      // ! Issue with the dialog
       content: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
             Text(
               "Please enter new folder name",
@@ -66,19 +81,20 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
       ),
       actions: [
         CupertinoDialogAction(
-          onPressed: _textController.text.trim().isEmpty
+          onPressed: !_isTextValid
           ? null
           : () async {
-            _uploadService.addFolder(_textController.text);
+            _uploadService.addFolder(_textController.text, widget.currentFolderPath);
             Navigator.of(context).pop(true);
           },
           child: Text(
             "Ok",
-            style: _isCancelEnabled
-            ? TextStyle(color: Colors.blue)
+            style: _isTextValid
+            ? TextStyle(color: Theme.of(context).colorScheme.primary)
             : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
           ),
         ),
+
         CupertinoDialogAction(
           child: Text(
             "Cancel",

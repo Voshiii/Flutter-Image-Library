@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:photo_album/pages/image_screen.dart';
 
 
 void showInfoModal(BuildContext context, Map<String, dynamic> data) {
@@ -25,7 +24,6 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
                   onTap: () => Navigator.pop(context),
 
                   child: Container(
-                    // padding: EdgeInsets.all(10),
                     margin: const EdgeInsets.symmetric(horizontal: 10),
                     
                     child: Text(
@@ -40,7 +38,7 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
                 )
               ),
 
-              Icon(Icons.folder, size: 150, color: Colors.blue),
+              Icon(Icons.folder, size: 150, color: Theme.of(context).colorScheme.primary),
               SizedBox(height: 5),
               Text(data["name"], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               SizedBox(height: 5),
@@ -50,18 +48,19 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
                 child: Column(
                   children: [
                     GestureDetector(
+                      // TODO Should open the item using the button
                       onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ImageScreen(folderName: data["name"]),
-                          ),
-                        );
+                        // Navigator.pop(context);
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => ImageScreen(folderName: data["name"]),
+                        //   ),
+                        // );
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: EdgeInsets.all(15),
@@ -78,6 +77,7 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    SizedBox(height: 15,)
                   ],
                 )
               ),
@@ -91,6 +91,7 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
   );
 }
 
+// This handles the list items
 Widget infoList(dynamic data) {
   return ListView(
     shrinkWrap: true,
@@ -105,6 +106,7 @@ Widget infoList(dynamic data) {
   );
 }
 
+// Round the bytes to two (also from bytes to MB, TB, GB, etc.)
 String _roundValue(int bytes) {
   double mb = bytes / 1e6;
   String bts = bytes > 99999999 ? '' : '$bytes bytes';
@@ -138,7 +140,6 @@ Widget _infoTile(String title, dynamic trailing) {
       ListTile(
         title: Row(
           children: [
-            // Text(title, style: TextStyle(fontSize: 13, color: const Color.fromARGB(156, 0, 0, 0)),),
             Text(title, style: TextStyle(fontSize: 13)),
             Spacer(),
             trailing is String

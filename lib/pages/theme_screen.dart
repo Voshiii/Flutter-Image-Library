@@ -10,6 +10,7 @@ class MyThemePage extends StatefulWidget {
 }
 
 class _MyThemePageState extends State<MyThemePage> {
+  // get the options for each theme possibility
   final List<Map<String, String>> themeOptions = [
     {"label": "Light Mode", "value": "light"},
     {"label": "Dark Mode", "value": "dark"},
@@ -21,6 +22,7 @@ class _MyThemePageState extends State<MyThemePage> {
   @override
   void initState() {
     super.initState();
+    // ensures no calling of setState (or doing other UI changes) during the build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTheme();
     });
@@ -47,11 +49,12 @@ class _MyThemePageState extends State<MyThemePage> {
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
             child: Column(
               children: List.generate(themeOptions.length * 2 - 1, (index) {
+                // Add divider between the options
                 if (index.isOdd) {
                   return Divider(height: 1, thickness: 0.5, color: Colors.grey);
                 }
             
-                final option = themeOptions[index ~/ 2];
+                final option = themeOptions[index ~/ 2]; // -> divides and removes remainder
                 final isSelected = currentTheme == option["value"];
             
                 return GestureDetector(
@@ -73,7 +76,7 @@ class _MyThemePageState extends State<MyThemePage> {
                           Text(option["label"]!),
                           Icon(
                             Icons.check,
-                            color: isSelected ? Colors.blue : Colors.transparent,
+                            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                           ),
                         ],
                       ),

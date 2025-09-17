@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/settings_page_comp/logout_popup.dart';
+import 'package:photo_album/pages/account_screen.dart';
 import 'package:photo_album/pages/theme_screen.dart';
 
 
@@ -26,12 +27,22 @@ class MySettingsPage extends StatelessWidget {
           children: [
             // _buildTile(context, title: 'Favorites (NOT IMPLEMENTED)', onTap: () {}),
             _buildDivider(),
+            // TODO: Implement or rename for user to login with faceID or passcode
+            _buildTile(context, title: 'Account', onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => UserAccount()),
+              );
+            }),
+
+            _buildDivider(),
             _buildTile(context, title: 'Theme', onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => MyThemePage()),
               );
             }),
+
             _buildDivider(),
             _buildTile(context, title: 'Permissions', onTap: () {
               Navigator.push(
@@ -39,6 +50,7 @@ class MySettingsPage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => Placeholder()),
               );
             }),
+
             _buildDivider(),
             _buildTile(context, title: 'Logout', textColor: Colors.red, onTap: () {
               showDialog(
