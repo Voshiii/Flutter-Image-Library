@@ -1,147 +1,114 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/auth/dio.dart';
+
+// ! REMOVE GET REQUEST BODIES
 
 class FetchService {
   final Dio _dio = Dio();
   CancelToken? _cancelToken;
   String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-  // Private constructor
-  FetchService._internal();
-
-  // The singleton instance
-  static final FetchService _instance = FetchService._internal();
-
-  // Factory constructor returns the same instance
-  factory FetchService() => _instance;
-
   final _folderController = StreamController<List<dynamic>>.broadcast();
 
-  Stream<List<dynamic>> fetchInstantFolder() {
-    // Start fetching instantly
-    getFolders();
-    return _folderController.stream;
-  }
+  final _folderNameController = StreamController<Map<String, dynamic>>.broadcast();
 
-  Future<void> getFolders() async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
-
-    try {
-      final response = await _dio.get(
-        url.toString(),
-        options: Options(
-          headers: {'Authorization': basicAuth},
-        ),
-        cancelToken: _cancelToken,
-      );
-
-      final List<dynamic> data = response.data['folders'];
-      _folderController.add(data);
-    } 
-    catch (e) {
-      if (e is DioException && CancelToken.isCancel(e)) {
-        print("Error!");
-      } else {
-        print("Fetch failed: $e");
-      }
-      _folderController.add([]);
-    }
+  Stream<Map<String, dynamic>> fetchInstantNames(String folderName){
+    fetchFileNames(folderName);
+    return _folderNameController.stream;
   }
  
-  Future<List<String>> fetchFileNames(String folderName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  // Get folder item names and metaData
+  Future<void> fetchFileNames(String folderPath) async {
+    final username = await AuthService.getUsername();
+
+    final encodedPath = Uri.encodeComponent(folderPath);
+    Uri url = Uri.parse('$baseUrl/uploads/names/$username/$encodedPath');
 
     try {
-      final response = await _dio.get(
+      final response = await Api.dio.get(
         url.toString(),
         options: Options(
-          headers: {
-            'Authorization': basicAuth,
+          headers: { 
+            'Content-Type': 'application/json',
           },
           responseType: ResponseType.json,
         ),
-        cancelToken: _cancelToken,
+        cancelToken: _cancelToken
       );
 
       if(response.statusCode == 204){
-        return [];
+        _folderNameController.add({});
+      }
+      else{
+        final Map<String, dynamic> data = response.data['folderItems'];
+        _folderNameController.add(data);
       }
 
-      final data = response.data;
-      return List<String>.from(data['folderItems']);
     } 
     catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
-        print("Error!");
-        return [];
+        print("Error getting file names!");
+        _folderNameController.add({});
       } else {
         print("Fetch file name failed: $e");
-        return [];
+        _folderNameController.add({});
       }
     }
-
-
   }
 
+  Future<Map<String, dynamic>> temp() async{
+    await Future.delayed(Duration(seconds: 2));
+    return {};
+  }
 
-  Future<Uint8List?> fetchFile(String folderName, String fileName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/GET/$folderName/$fileName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  // ! NEW
+  // Get individual file data
+  Future<Map<String, dynamic>> fetchFile(String folderPath, String fileName) async {
+    final username = await AuthService.getUsername();
+
+    final encodedPath = Uri.encodeComponent(folderPath);
+    Uri url = Uri.parse('$baseUrl/uploads/fileContent/$username/$encodedPath/$fileName');
 
     // Send a GET request
     try {
-      final response = await _dio.get(
+      final response = await Api.dio.get(
         url.toString(),
         options: Options(
           headers: {
-            'Authorization': basicAuth,
-            'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
+            'Content-Type': 'application/json',
           },
           responseType: ResponseType.json,
         ),
         cancelToken: _cancelToken,
       );
 
-      if(response.statusCode == 204){
-        return null;
-      }
+      final fileInfo = response.data;
+      return fileInfo;
 
-      final String base64String = response.data['data'];
-      final String base64Clean = base64String.split(',')[1];
-
-      return base64Decode(base64Clean);
     } 
     catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
-        print("Error!");
-        return null;
+        log("Error!");
+        return {};
       } else {
-        print("Fetch failed: $e");
-        return null;
+        log("Fetch failed: $e");
+        return {};
       }
     }
   }
 
 
-  // Change to "fetchFiles"
+  // * Used to get all the files to share
+  // Change this so no need for re-fetching?
   Future<List<dynamic>> fetchAllFiles(String folderName) async {
     String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName/ALL');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+    Uri url = Uri.parse('$baseUrl/uploads/$username/$folderName/ALL');
 
     // Send a GET request
     try {
@@ -149,7 +116,6 @@ class FetchService {
         url.toString(),
         options: Options(
           headers: {
-            'Authorization': basicAuth,
             'Accept': 'image/jpeg, image/png, video/mp4, video/quicktime',
           },
           responseType: ResponseType.bytes,
@@ -172,11 +138,37 @@ class FetchService {
         print("Error!");
         return [];
       } else {
-        print("Fetch failed: $e");
+        // print("Fetch failed: $e");
         return [];
       }
     }
   }
+
+  // Future<void> downloadAndSaveImage(String imageUrl) async {
+  //   // Request permissions
+  //   await Permission.storage.request();
+
+  //   try {
+  //     final response = await _dio.get(
+  //       imageUrl,
+  //       options: Options(
+  //         responseType: ResponseType.bytes, // Very important!
+  //       ),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final Uint8List bytes = Uint8List.fromList(response.data);
+
+  //       final result = await ImageGallerySaver.saveImage(bytes);
+  //       log('Saved to gallery: $result');
+  //     } else {
+  //       log('Failed to download image: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     log('Error downloading image: $e');
+  //   }
+  // }
+
 
    
   void cancelUpload() {
