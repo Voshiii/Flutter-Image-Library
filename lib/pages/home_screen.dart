@@ -1,25 +1,29 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:photo_album/components/home_page_comp/folder_button.dart';
+import 'package:flutter/material.dart' hide LinearGradient;
+import 'package:photo_album/animations/loading_anim.dart';
+// import 'package:photo_album/animations/empty_folder_anim.dart';
+import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/components/home_page_comp/data_grid.dart';
 import 'package:photo_album/components/home_page_comp/no_internet.dart';
 import 'package:photo_album/components/home_page_comp/pop_up_add_folder.dart';
-import 'package:photo_album/pages/image_screen.dart';
+import 'package:photo_album/components/home_page_comp/add_options.dart';
+import 'package:photo_album/components/home_page_comp/file_selector.dart';
 import 'package:photo_album/pages/settings_screen.dart';
 import 'package:photo_album/services/fetch_service.dart';
-import 'package:rive/rive.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:photo_album/components/home_page_comp/folder_on_hold_popup.dart';
 
 // This class (or a class that this class inherits from) is marked as 
 //'@immutable', but one or more of its instance fields aren't final: 
 //HomeScreen.folderStream
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
-  late Stream<List<dynamic>> folderStream;
+  late Stream<Map<String, dynamic>> fileStream;
+  final String currentFolderPath; // full folderpath including name
 
   HomeScreen({
     super.key,
-    required this.folderStream
+    required this.fileStream,
+    required this.currentFolderPath
   });
 
   @override
@@ -31,225 +35,214 @@ class _HomescreenState extends State<HomeScreen> {
   bool hasInternet = true;
 
   final TextEditingController _searchController = TextEditingController();
-  List<dynamic> _allFolders = [];
-  List<dynamic> _filteredFolders = [];
+  List<dynamic> allFiles = [];
+
+  final GlobalKey _buttonKey = GlobalKey();
+
+  Stream<Map<String, dynamic>>? currentWindowFileStream;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 2000));
-    _searchController.addListener(_onSearchChanged);
+    currentWindowFileStream = widget.fileStream;
   }
 
-  void _onSearchChanged() {
-    final query = _searchController.text.toLowerCase();
-    if (!mounted) return;
-    setState(() {
-      _filteredFolders = _allFolders
-          .where((folder) => folder["name"].toLowerCase().contains(query))
-          .toList();
-    });
+
+  void _showOptionsMenu() {
+    final RenderBox button = _buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = button.localToGlobal(Offset.zero);
+    final Size size = button.size;
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Dismiss",
+      barrierColor: Colors.black12,
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(), // Required
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: Stack(
+            children: [
+              Positioned(
+                top: offset.dy + size.height + 8,
+                right: 16,
+                child: IOSPopupMenu( // The 'add' button will give 3 options
+                  onSelect: (value) {
+                    switch (value) {
+                      case "Upload from Files":
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => FileSelectorDialog(folderPath: widget.currentFolderPath, fromGallery: false)
+                        ).then((reload) {
+                          if(reload == true){refreshFiles();}
+                        });
+                        break;
+                      case "Upload from Gallery":
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => FileSelectorDialog(folderPath: widget.currentFolderPath, fromGallery: true)
+                        ).then((reload) {
+                          if(reload == true){refreshFiles();}
+                        });
+                        break;
+                      case "New Folder":
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => PopUpAddFolder(currentFolderPath: widget.currentFolderPath,),
+                        ).then((reload) {
+                          if(reload == true){
+                            refreshFiles();
+                          }
+                        });
+                        break;
+                      default:
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 150),
+    );
   }
 
   @override
   void dispose() {
-   _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> refreshFolders() async {
+  Future<void> refreshFiles() async {
     if (!mounted) return;
-    await _fetchService.getFolders();
+    // ! CHANGE THIS
+    final localNameController = StreamController<Map<String, dynamic>>();
+
+    _fetchService.fetchInstantNames(widget.currentFolderPath).listen(
+      (data) {
+        localNameController.add(data);
+      },
+      onDone: () => localNameController.close(),
+      onError: (error) => localNameController.addError(error),
+    );
+
     setState(() {
-      _allFolders = [];
-      _filteredFolders = [];
+      currentWindowFileStream = localNameController.stream;
     });
-    hasInternet = await InternetConnection().hasInternetAccess;
   }
 
-  String getParsedFolderName(String folderName){
-    if (folderName.length > 12){
-      return "${folderName.substring(0, 6)}...${folderName.substring(folderName.length - 5)}";
+  String getParsedFileName(String fileName){
+    if (fileName.endsWith('.enc')) {
+      return fileName.substring(0, fileName.length - 4); // remove ".enc"
     }
-    return folderName;
+    if (fileName.length > 12){
+      return "${fileName.substring(0, 6)}...${fileName.substring(fileName.length - 5)}";
+    }
+    return fileName;
   }
+
+  bool isFile(String name) => name.contains('.') && !name.startsWith('.');
 
   int getCrossAxisCount(double width) {
-  if (width >= 1024) {
-    // iPad width and bigger tablets
-    return 5;
-  } else if (width >= 600) {
-    // Large phones, small tablets
-    return 4;
-  } else {
-    // Phones in portrait (like iPhone)
-    return 3;
+    if (width >= 1024) {
+      // iPad width and bigger tablets
+      return 5;
+    } else if (width >= 600) {
+      // Large phones, small tablets
+      return 4;
+    } else {
+      // Phones in portrait (like iPhone)
+      return 3;
+    }
   }
-}
 
-  Widget _buildImageView() {
-    OverlayEntry? overlayEntry;
-    final width = MediaQuery.of(context).size.width;
-    final _crossAxisCount = getCrossAxisCount(width);
-
-
-    return StreamBuilder<List<dynamic>>(
-      // stream: widget.folderStream,
-      stream: _fetchService.fetchInstantFolder(),
+  Widget _buildBody() {
+    return StreamBuilder<Map<String, dynamic>>(
+      stream: currentWindowFileStream,
       builder: (context, snapshot) {
-        if(!hasInternet){
-          return Column(
-            children:[ SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: NoWifi(),
-            ),]
-          );
-        }
-        else if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: RiveAnimation.asset(
-              'riv_assets/fillfolder.riv',
-              fit: BoxFit.contain,
-            ),
-          ); // Show loading animation
-        } 
-        else if (snapshot.hasError) {
-          return Column(
-            children:[ SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: NoWifi(),
-            ),]
-          );
-        } 
-        else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Center(child: Text("No folders found!")),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        }
+        if(!hasInternet){ return _buildNoWifi(); }
+        else if (snapshot.connectionState == ConnectionState.waiting) { return _buildFillFolder(); } 
+        else if (snapshot.hasError) { return _buildNoWifi(); } 
+        else if (!snapshot.hasData || snapshot.data!.isEmpty) { return _buildEmpty(); }
 
-        if (_allFolders.isEmpty || _allFolders.length != snapshot.data!.length) {
-          _allFolders = snapshot.data!;
-          _filteredFolders = _searchController.text.isEmpty
-              ? _allFolders
-              : _allFolders
-                  .where((folder) => folder["name"]
-                      .toLowerCase()
-                      .contains(_searchController.text.toLowerCase()))
-                  .toList();
-        }
+        allFiles = snapshot.data!.keys.toList();
 
-
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  onChanged: (_) => _onSearchChanged(),
-                  placeholder: 'Search folders...',
-                  prefixIcon: Icon(Icons.search),
-                  suffixIcon: Icon(Icons.clear),
-                  style: TextStyle(color: CupertinoTheme.of(context).brightness == Brightness.dark
-                    ? CupertinoColors.white
-                    : CupertinoColors.black,),
-                ),
-              ),
-          
-              Expanded(
-                child: Stack(
-                  children: [
-                    GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        // crossAxisCount: 3,
-                        crossAxisCount: _crossAxisCount,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: _filteredFolders.length,
-                      itemBuilder: (context, index) {
-                        final parsedFolderName = getParsedFolderName(_filteredFolders[index]["name"]);
-                        return Builder(
-                          builder: (context) {
-                            final layerLink = LayerLink();
-                            final key = GlobalKey();
-                                    
-                            return GestureDetector(
-                              key: key,
-                              onLongPress: () {
-                                final renderBox = key.currentContext!.findRenderObject() as RenderBox;
-                                final position = renderBox.localToGlobal(Offset.zero);
-                                final size = renderBox.size;
-                                    
-                                showContextMenu(context, layerLink, position, size, overlayEntry, refreshFolders, _filteredFolders[index], parsedFolderName);
-                              },
-                              child: CompositedTransformTarget(
-                                link: layerLink,
-                                child: MyFolderButton(
-                                  folderName: parsedFolderName,
-                                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ImageScreen(folderName: _filteredFolders[index]["name"]),
-                                      ),
-                                    );
-                                  },
-                                  data: _filteredFolders[index]
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 30,)
-            ],
-          ),
+        return FilesSearchAndGrid(
+          allFiles: allFiles,
+          fileDataMap: snapshot.data!,
+          currentFolderPath: widget.currentFolderPath,
+          refreshFiles: refreshFiles,
         );
       });
   }
   
+  Widget _buildNoWifi() {
+    return 
+      Column(
+        children:[ SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: NoWifi(),
+        ),]
+      );
+  }
+
+  Widget _buildFillFolder(){
+    return MyLoadAnimation(); // Show loading animation
+  }
+
+  Widget _buildEmpty(){
+    return 
+    // MyEmptyFolderAnim();
+      LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Center(child: Text("No items found!")),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Folders"),
+        title: 
+        ShaderMask(
+          shaderCallback: (bounds) => LinearGradient(
+            colors: [Colors.blue, Colors.red],
+          ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+          child: 
+          widget.currentFolderPath.contains("/")
+          ? Text(widget.currentFolderPath.split("/").last) // get the last foldername: username/paht/Newfolder -> Newfolder
+          : Text(
+            AuthService.currentUsername!,
+            style: TextStyle(
+              fontWeight: FontWeight.bold
+            ),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.create_new_folder_rounded),
+            icon: Icon(
+              Icons.add_circle_outline_rounded,
+              size: 30,
+            ),
+            key: _buttonKey,
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => PopUpAddFolder(),
-              ).then((reload) {
-                if(reload == true){refreshFolders();}
-              });
+              _showOptionsMenu();
             },
           ),
           IconButton(
@@ -266,8 +259,8 @@ class _HomescreenState extends State<HomeScreen> {
         ],
       ),
       body: RefreshIndicator( 
-        onRefresh: refreshFolders,
-        child: _buildImageView()
+        onRefresh: refreshFiles,
+        child: _buildBody()
       ),
     );
   }
