@@ -1,20 +1,25 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
-import 'package:photo_album/pages/home_screen.dart';
-import 'package:photo_album/pages/login.dart';
-import 'package:photo_album/services/fetch_service.dart';
+import 'package:photo_album/components/push_homescreen.dart';
+import 'package:photo_album/pages/login_screen.dart';
 
 class MySplashScreen extends StatefulWidget {
   const MySplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class _SplashScreenState extends State<MySplashScreen> with SingleTickerProviderStateMixin {
+//! TODO: When the names are loaded, try getting the data already
+
+class SplashScreenState extends State<MySplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  final FetchService _fetchService = FetchService();
+  // final FetchService _fetchService = FetchService();
+
+  // ! REMOVE FOR PROD, USED TO REMOVE SPLASHSCREEN WAIT
+  // bool _removeSplashScreen = true;
 
   @override
   void initState() {
@@ -31,30 +36,33 @@ class _SplashScreenState extends State<MySplashScreen> with SingleTickerProvider
 
   Future<void> _loadDataAndLogin() async {
     bool loggedIn = await AuthService.isLoggedIn();
+    // print("Is logged in: $loggedIn");
 
     if(!loggedIn){
+      await AuthService.saveFaceIDPref(false);
+
+      // if(!_removeSplashScreen){
+      //   await Future.delayed(Duration(seconds: 2));
+      // }
+      
+      if(!mounted) return;
+
+      // Navigate to Login page if not logged in
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => LoginPage()),
-      );
-    }
-    else{
-      // Start fetching data immediately
-      Stream<List<dynamic>> responseData = _fetchService.fetchInstantFolder();
-
-      // Wait for animation to finish too
-      await Future.delayed(Duration(seconds: 2));
-
-      Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, animation, __) => HomeScreen(folderStream: responseData),
+          pageBuilder: (_, animation, __) => LoginPage(),
           transitionsBuilder: (_, animation, __, child) {
             return FadeTransition(opacity: animation, child: child);
           },
           transitionDuration: Duration(milliseconds: 800),
         ),
       );
-
+    }
+    else{
+      // Navigate to homescreen if already logged in
+      if(!mounted) return;
+      pushToHomeScreen(context, "Fade");
 
     }
   }
