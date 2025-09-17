@@ -2,26 +2,28 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:photo_album/components/home_page_comp/folder_button.dart';
 import 'package:photo_album/components/home_page_comp/info_modal.dart';
 import 'package:photo_album/components/home_page_comp/my_delete_popup.dart';
 import 'package:photo_album/components/home_page_comp/rename_folder_dialog.dart';
-import 'package:photo_album/pages/image_screen.dart';
 import 'package:photo_album/services/fetch_service.dart';
 import 'package:photo_album/services/share_img.dart';
 
 
 void showContextMenu(BuildContext context, 
     LayerLink layerLink, 
-    Offset position, 
-    Size size, 
+    Offset position, // location of the button
+    Size size, // button size
     OverlayEntry? overlayEntry,
     Future<void> Function()? onRefresh,
     dynamic data,
-    String parsedFolderName,
+    String parsedFileName, // File name (e.g. imag...e.jpg)
+    String currentFolderPath, // the current folderPath (e.g. username/newFolder)
+    String fullFileName, // Full file name (e.g. imag123e.jpg)
+    bool isFile, // Bool if item is a file or folder
+    Widget dataButtonWidget // Used to bring the button to the front when long clicking
   ){
   final screenSize = MediaQuery.of(context).size;
-  final FetchService _fetchService = FetchService();
+  final FetchService fetchService = FetchService();
 
   // Safe margin
   final popupWidth = 160.0;
@@ -89,21 +91,8 @@ void showContextMenu(BuildContext context,
                 child: SizedBox(
                   width: size.width,
                   height: size.height,
-                  child: MyFolderButton(
-                    folderName: parsedFolderName,
-                    backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(51),
-                    data: data,
-                    onTap: () {
-                      controller.dispose();
-                      overlayEntry?.remove();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ImageScreen(folderName: parsedFolderName),
-                        ),
-                      );
-                    },
-                  ),
+                  child: 
+                  dataButtonWidget
                 ),
               ),
             ),
@@ -134,6 +123,7 @@ void showContextMenu(BuildContext context,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                           
+                          // TODO Copy items [NOT IMPLEMENTED]
                           Expanded(
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
@@ -149,10 +139,11 @@ void showContextMenu(BuildContext context,
                             ),
                           ),
                           
+                          // TODO Share items [NEEDS TO BE FIXED]
                           Expanded(
                             child: GestureDetector(
                               onTap: () async {
-                                List<dynamic> folderImages = await _fetchService.fetchAllFiles(data["name"]);
+                                List<dynamic> folderImages = await fetchService.fetchAllFiles(data["name"]);
                                 List<Uint8List> savedImages = [];
                                 for (var i = 0; i < folderImages.length; i++){
                                   savedImages.add(base64Decode(folderImages[i]['data'].split(',')[1]));
@@ -161,6 +152,7 @@ void showContextMenu(BuildContext context,
                                 await controller.reverse();
                                 overlayEntry?.remove();
                                 if (savedImages.isEmpty){
+                                  if(!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Error occured!')),
                                   );
@@ -178,22 +170,46 @@ void showContextMenu(BuildContext context,
                               ),
                             ),
                           ),
+
+                          // TODO Download [NOT IMPLEMENTED]
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.download),
+                                  Text(
+                                    "Download",
+                                    style: TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+
                         ],),
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
+                      
+                      // TODO Get info from item [only works with folder for now]
                       ListTile(
-                        title: Row(children: [
-                          Text("Get info"),
-                          Spacer(),
-                          Icon(Icons.info_outline)
-                        ],),
+                        title: Row(
+                          children: [
+                            Text("Get info"),
+                            Spacer(),
+                            Icon(Icons.info_outline)
+                          ],
+                        ),
                         onTap: () async {
-                          await controller.reverse();
+                          await controller.reverse(); // play animation when closing
                           overlayEntry?.remove();
+                          if(!context.mounted) return;
                           showInfoModal(context, data);
                         },
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
+                      
+                      // Rename item
                       ListTile(
                         title: Row(children: [
                           Text("Rename"),
@@ -201,12 +217,13 @@ void showContextMenu(BuildContext context,
                           Icon(Icons.drive_file_rename_outline)
                         ],),
                         onTap: () async {
-                          await controller.reverse();
+                          await controller.reverse(); // play animation when closing
                           overlayEntry?.remove();
                           
+                          if(!context.mounted) return;
                           final result = await showDialog<bool>(
                             context: context,
-                            builder: (context) => PopUpRenameFolder(oldFolderName: data["name"]),
+                            builder: (context) => PopUpRenameFolder(oldFolderName: data["name"], currentFolderPath: currentFolderPath),
                           );
 
                           if (result == true) {
@@ -216,6 +233,8 @@ void showContextMenu(BuildContext context,
                         },
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
+
+                      // TODO Favorite [NOT IMPLEMENTED YET]
                       ListTile(
                         title: Row(children: [
                           Text("Favorite"),
@@ -224,6 +243,8 @@ void showContextMenu(BuildContext context,
                         ],)
                       ),
                       Divider(height: 1, thickness: 1, color: Colors.grey,),
+                      
+                      // Delete item
                       ListTile(
                         title: Row(children: [
                           Text("Delete",
@@ -232,11 +253,14 @@ void showContextMenu(BuildContext context,
                           Icon(Icons.delete, color: Colors.red,)
                         ],),
                         onTap: () async {
-                          await controller.reverse();
+                          await controller.reverse(); // play animation when closing
                           overlayEntry?.remove();
+                          if(!context.mounted) return;
                           final result = await showDialog<bool>(
                             context: context,
-                            builder: (context) => MyDeleteDialog(folderName: data["name"]),
+                            builder: (context) => MyDeleteDialog(
+                              fileName: fullFileName, filePath: currentFolderPath,
+                            ),
                           );
 
                           if (result == true) {
