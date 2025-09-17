@@ -28,8 +28,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _usernameController.addListener(() {setState(() {});});
-    _pwdController.addListener(() {setState(() {});});
+    void listener() => setState(() {});
+    _usernameController.addListener(listener);
+    _pwdController.addListener(listener);
   }
 
   @override
