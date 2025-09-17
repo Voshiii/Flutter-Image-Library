@@ -55,8 +55,11 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
         "Folder name",
         style: TextStyle(fontSize: 22),
       ),
+
+      // ! Issue with the dialog
       content: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
             Text(
               "Please enter new folder name",
