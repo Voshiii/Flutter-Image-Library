@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/auth/face_id_auth.dart';
+import 'package:photo_album/components/error_dialog.dart';
 import 'package:photo_album/components/push_homescreen.dart';
 import 'package:photo_album/pages/login_screen.dart';
 
@@ -35,7 +38,9 @@ class SplashScreenState extends State<MySplashScreen> with SingleTickerProviderS
   }
 
   Future<void> _loadDataAndLogin() async {
+    final bool prefFaceID = await AuthService.getFaceIdPref();
     bool loggedIn = await AuthService.isLoggedIn();
+
     // print("Is logged in: $loggedIn");
 
     if(!loggedIn){
@@ -61,9 +66,41 @@ class SplashScreenState extends State<MySplashScreen> with SingleTickerProviderS
     }
     else{
       // Navigate to homescreen if already logged in
+      _attemptLoginWithFaceID(prefFaceID);
+    }
+  }
+
+  void _attemptLoginWithFaceID(bool prefFaceID) async {
+    if(prefFaceID){
+      final didAuth = await authenticateUser();
+      if(didAuth){
+        if(!mounted) return;
+        pushToHomeScreen(context, "Fade");
+      }
+      else{
+        if(!mounted) return;
+        errorDialog(context, "Error Authenticating", "Face ID");
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => CupertinoAlertDialog(
+            title: Text("Authentication Failed!"),
+            content: Text("Biometric authentication failed. Please try again!"),
+            actions: [
+              CupertinoDialogAction(
+                child: Text("Ok"),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _attemptLoginWithFaceID(prefFaceID);
+                },
+              )
+            ],
+          )
+        );
+      }
+    }
+    else{
       if(!mounted) return;
       pushToHomeScreen(context, "Fade");
-
     }
   }
 
