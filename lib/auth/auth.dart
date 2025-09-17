@@ -94,8 +94,10 @@ class AuthService {
       // If login success, save information to device
       if (res.statusCode == 200) {
         final token = res.data['token'];
+        final email = res.data['email'];
         await saveToken(token);
         await saveUsername(username);
+        await saveEmail(email);
         await Api.setAuthToken(token);
         return res.statusCode;
       } 
