@@ -1,30 +1,30 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_album/auth/auth.dart';
+import 'package:photo_album/auth/dio.dart';
 
 class DeleteService {
-  final Dio _dio = Dio();
   CancelToken? _cancelToken;
   String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-  Future<dynamic> deleteFolder(String folderName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  Future<dynamic> deleteFolder(String folderPath) async {
+    final username = await AuthService.getUsername();
+    Uri url = Uri.parse('$baseUrl/uploads/delete/folder');
 
     try {
-      final response = await _dio.delete(
+      final response = await Api.dio.delete(
         url.toString(),
-        data: jsonEncode({'folderName': folderName}),
+        data: {
+          "username": username,
+          "folderPath": folderPath,
+        },
         options: Options(
-          headers: {
-            'Authorization': basicAuth,
+          headers: { 
+            'Content-Type': 'application/json',
           },
+          responseType: ResponseType.json,
         ),
-        cancelToken: _cancelToken,
+        cancelToken: _cancelToken
       );
 
       final data = response.data;
@@ -34,32 +34,32 @@ class DeleteService {
       if (e is DioException && CancelToken.isCancel(e)) {
         return [];
       } else {
-        print("Delete failed: $e");
+        print("Delete folder failed: $e");
         return [];
       }
     }
   }
 
 
-  Future<void> deleteImage(String folderName, String imgName) async {
-    String? username = await AuthService.getUsername();
-    String? password = await AuthService.getPassword();
-    Uri url = Uri.parse('$baseUrl/uploads/$folderName');
-    String basicAuth = 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+  Future<void> deleteFile(String folderPath, String fileName) async {
+    final username = await AuthService.getUsername();
+    Uri url = Uri.parse('$baseUrl/uploads/delete/file');
 
     try {
-      final response = await _dio.delete(
+      final response = await Api.dio.delete(
         url.toString(),
-        data: jsonEncode({
-          'folderName': folderName,
-          'fileName': imgName,
-        }),
+        data: {
+          "username": username,
+          "fileName": fileName,
+          "folderPath": folderPath,
+        },
         options: Options(
-          headers: {
-            'Authorization': basicAuth,
+          headers: { 
+            'Content-Type': 'application/json',
           },
+          responseType: ResponseType.json,
         ),
-        cancelToken: _cancelToken,
+        cancelToken: _cancelToken
       );
 
       final data = response.data;
@@ -67,11 +67,9 @@ class DeleteService {
 
     } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
-        // return [];
-        print("Cancelled?");
+        print("Delete file failed: $e");
       } else {
-        print("Delete failed: $e");
-        // return [];
+        print("Delete file failed: $e");
       }
     }
   }
