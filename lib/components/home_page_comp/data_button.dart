@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:photo_album/services/fetch_service.dart';
+import 'package:photo_album/cache/file_data_cache.dart';
 import 'package:photo_album/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +14,7 @@ class DataButton extends StatefulWidget {
   final bool isFile;
   final String folderPath;
   final String fullFileName;
-  final dynamic cachedData;
+  // final dynamic cachedData;
 
   // ! Change to "IconButton"
   const DataButton({
@@ -25,7 +25,7 @@ class DataButton extends StatefulWidget {
     required this.isFile,
     required this.folderPath,
     required this.fullFileName,
-    required this.cachedData
+    // required this.cachedData
     });
 
   @override
@@ -40,9 +40,7 @@ class _DataButtonState extends State<DataButton> {
   String decodedText = "";
   Uint8List decodedBytes = Uint8List(0);
 
-  final FetchService _fetchService = FetchService();
-
-  Map<String, dynamic> fileData = {};
+  dynamic fileData = {};
 
   @override
   void initState() {
@@ -50,27 +48,17 @@ class _DataButtonState extends State<DataButton> {
     _loadTheme();
     formatDate();
 
-    // If file data is not in cache
-    if(widget.isFile && widget.cachedData[widget.fullFileName] == null){
-      loadFileData();
-    }
-    // API call for data if not in cache
-    else if(widget.cachedData[widget.fullFileName] != null){
-      setState(() {
-        fileData = widget.cachedData[widget.fullFileName];
-      });
-    }
+    getData();
   }
 
-  void loadFileData() async {
-    // Get the data of file
-    final newData = await _fetchService.fetchFile(widget.folderPath, widget.fullFileName);
-    setState(() {
-      fileData = newData;
-       
-       // Add to cache so API calls don't need to be made every time
-      widget.cachedData[widget.fullFileName] = newData;
-    });
+  void getData() async {
+    if(widget.isFile){
+      final newData = await FileCacheHelper.getFileData(widget.fullFileName, widget.folderPath);
+      setState(() {
+        fileData = newData;
+      });
+    }
+    // else it's just a folder
   }
 
   void formatDate(){
@@ -89,9 +77,8 @@ class _DataButtonState extends State<DataButton> {
 
   // Handle data if the file is a text
   void handleDataText(data){
-    // print("DATA FOR TEXT: $data");
-    final base64Str = data["data"] ?? '';
-    final decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Decode(base64Str);
+    final base64Str = data ?? '';
+    final decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Str;
     setState(() {
       decodedText = utf8.decode(decodedBytes);
     }); 
@@ -99,9 +86,9 @@ class _DataButtonState extends State<DataButton> {
 
   // Handle data if the file is an image
   void handleDataImg(data){
-    final base64Str = data["data"] ?? '';
+    final base64Str = data ?? '';
     setState(() {
-      decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Decode(base64Str);
+      decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Str;
     });
   }
 

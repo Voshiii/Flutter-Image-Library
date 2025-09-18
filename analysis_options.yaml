@@ -1,5 +1,5 @@
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  rules:
-    avoid_print: false
+# linter:
+#   rules:
+#     avoid_print: false

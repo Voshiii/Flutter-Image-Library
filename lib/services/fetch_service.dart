@@ -7,8 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/dio.dart';
 
-// ! REMOVE GET REQUEST BODIES
-
 class FetchService {
   final Dio _dio = Dio();
   CancelToken? _cancelToken;
@@ -69,7 +67,7 @@ class FetchService {
 
   // ! NEW
   // Get individual file data
-  Future<Map<String, dynamic>> fetchFile(String folderPath, String fileName) async {
+  Future<dynamic> fetchFile(String folderPath, String fileName) async {
     final username = await AuthService.getUsername();
 
     final encodedPath = Uri.encodeComponent(folderPath);

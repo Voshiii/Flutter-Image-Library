@@ -29,7 +29,7 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
   final TextEditingController _searchController = TextEditingController();
   late List<dynamic> _filteredFiles;
 
-  Map<String, dynamic> cachedData = {};
+  // Map<String, dynamic> cachedData = {};
 
   @override
   void initState() {
@@ -158,7 +158,8 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
 
         // The button which shows the item
         // -> Each item, folder, image, file, etc.
-        Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile, cachedData);
+        // Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile, cachedData);
+        Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile);
 
         final layerLink = LayerLink();
         final key = GlobalKey();
@@ -198,7 +199,8 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
   }
 
   // This is the actual button seen
-  Widget buildDataButton(fileName, parsedFileName, isActualFile, cachedData) {
+  // Widget buildDataButton(fileName, parsedFileName, isActualFile, cachedData) {
+  Widget buildDataButton(fileName, parsedFileName, isActualFile) {
     return DataButton(
       key: ValueKey(fileName), // keeps state between searches
       fullFileName: fileName,
@@ -224,7 +226,7 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
       data: widget.fileDataMap[fileName],
       isFile: isActualFile,
       folderPath: widget.currentFolderPath,
-      cachedData: cachedData,
+      // cachedData: cachedData,
     );
   }
 }
