@@ -18,8 +18,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
-
   final TextEditingController _pwdController = TextEditingController();
+
+  final FocusNode _usernameFocus = FocusNode();
+  final FocusNode _pwdFocus = FocusNode();
+
+  bool usernameTouched = false;
+  bool passwordTouched = false;
 
   final AuthService _authService = AuthService();
 
@@ -31,10 +36,24 @@ class _LoginPageState extends State<LoginPage> {
     void listener() => setState(() {});
     _usernameController.addListener(listener);
     _pwdController.addListener(listener);
+    _usernameFocus.addListener(() {if (!_usernameFocus.hasFocus) {setState(() => usernameTouched = true);}});
+    _pwdFocus.addListener(() {if (!_pwdFocus.hasFocus) {setState(() => passwordTouched = true);}});
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _usernameFocus.dispose();
+    _pwdController.dispose();
+    _pwdFocus.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final showErrorUsername = usernameTouched && _usernameController.text.isEmpty;
+    final showErrorPwd = passwordTouched && _pwdController.text.isEmpty;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -87,7 +106,15 @@ class _LoginPageState extends State<LoginPage> {
                             obscureText: false,
                             controller: _usernameController,
                             autofillHints: [AutofillHints.username],
+                            inputFocus: _usernameFocus,
                           ),
+                          if(showErrorUsername) ... [
+                            SizedBox(height: 3,),
+                            const Text(
+                              "Please enter a username",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
                           
                           SizedBox(height: 10,),
                           
@@ -96,7 +123,17 @@ class _LoginPageState extends State<LoginPage> {
                             obscureText: true,
                             controller: _pwdController,
                             autofillHints: [AutofillHints.password],
+                            inputFocus: _pwdFocus,
                           ),
+                          // SizedBox(height: 3,),
+                          if(showErrorPwd) ... [
+                            SizedBox(height: 3,),
+                            const Text(
+                              "Please enter a password",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
+                          SizedBox(height: 3,),
                         ],
                       ),
                     ),
@@ -111,12 +148,14 @@ class _LoginPageState extends State<LoginPage> {
                         setState(() => _isLoading = true);
           
                         try {
+                          // success
                           final res = await _authService.login(_usernameController.text, _pwdController.text, context);
-                          if(res == 200 && mounted){
+                          if(res.$1 == 200 && mounted){
                             if(!context.mounted) return;
                             pushToHomeScreen(context, "");
                           }
-                          else if (res == 401 && mounted){
+                          // Not found
+                          else if (res.$1 == 404 && mounted){
                             if (!context.mounted) return;
                             showDialog(
                               context: context,
@@ -125,6 +164,19 @@ class _LoginPageState extends State<LoginPage> {
                                 context,
                                 "Invalid Credentials",
                                 "Username or Password Incorrect!"
+                              ),
+                            );
+                          }
+                          // Not verified
+                          else if (res.$1 == 400 && mounted){
+                            if (!context.mounted) return;
+                            showDialog(
+                              context: context,
+                              // builder: (BuildContext context) => failedLoginDialog(context),
+                              builder: (BuildContext context) => errorDialog(
+                                context,
+                                "Error",
+                                res.$2
                               ),
                             );
                           }

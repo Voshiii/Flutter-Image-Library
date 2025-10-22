@@ -39,8 +39,9 @@ class SplashScreenState extends State<MySplashScreen> with SingleTickerProviderS
   }
 
   Future<void> _loadDataAndLogin() async {
-    final bool prefFaceID = await AuthService.getFaceIdPref();
+    // final bool prefFaceID = await AuthService.getFaceIdPref();
     bool loggedIn = await AuthService.isLoggedIn();
+    final prefFaceID = false;
     final token = await AuthService.getToken();
 
     // print("Is logged in: $loggedIn");
@@ -72,6 +73,7 @@ class SplashScreenState extends State<MySplashScreen> with SingleTickerProviderS
     }
   }
 
+  // ! TODO Check login when user cannot authenticate
   void _attemptLoginWithFaceID(bool prefFaceID, String token) async {
     if(prefFaceID){
       final didAuth = await authenticateUser();

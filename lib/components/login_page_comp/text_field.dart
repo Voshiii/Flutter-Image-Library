@@ -7,6 +7,7 @@ class MyTextfield extends StatelessWidget {
   final TextEditingController controller;
   final List<String>? autofillHints; // input saved password
   final List<TextInputFormatter>? inputFormatter; // can be used to limit number of words
+  final FocusNode inputFocus;
   
   const MyTextfield({
     super.key,
@@ -15,6 +16,7 @@ class MyTextfield extends StatelessWidget {
     required this.controller,
     this.autofillHints,
     this.inputFormatter,
+    required this.inputFocus,
 });
 
   @override
@@ -42,6 +44,12 @@ class MyTextfield extends StatelessWidget {
           onEditingComplete: () {
             FocusScope.of(context).unfocus(); // dismiss keyboard
           },
+          focusNode: inputFocus,
+          // autovalidateMode: AutovalidateMode.always,
+          // validator: (value) {
+          //   if (!showError) return null; // only validate if touched
+          //   return value!.isEmpty ? "Please enter a username" : null;
+          // },
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(

@@ -62,5 +62,7 @@
 		</array>
 		<key>NSUserNotificationUsageDescription</key>
 		<string>We need permission to send notifications</string>
+        <key>NSFaceIDUsageDescription</key>
+        <string>This app uses Face ID to securely authenticate your identity.</string>
 	</dict>
 </plist>

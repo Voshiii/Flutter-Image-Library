@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:photo_album/auth/dio.dart';
-import 'package:photo_album/components/push_homescreen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
@@ -81,7 +80,7 @@ class AuthService {
     currentUsername = "NOT LOGGED IN";
   }
 
-  Future<int?> login(String username, String password, BuildContext context) async {
+  Future<(int, String)> login(String username, String password, BuildContext context) async {
     try {
       final res = await Api.dio.post(
         '/login',
@@ -99,44 +98,44 @@ class AuthService {
         await saveUsername(username);
         await saveEmail(email);
         await Api.setAuthToken(token);
-        return res.statusCode;
-      } 
+        return (res.statusCode ?? 200, res.data.toString());
+      }
       
-      return res.statusCode;
+      return (res.statusCode ?? 500, res.data.toString());
     } on DioException catch (e) {
       print("ERROR LOGGING IN: $e");
       if (e.response != null) {
         // Server responded with non-200
-        return e.response?.statusCode ?? 500;
+        return (e.response?.statusCode ?? 400, e.response?.data.toString() ?? "Authentication Issue");
       } else {
         // No response (e.g. network issue)
-        return 500;
+        // Res code "500" will automatically show "Server error!" "Please try again later!"
+        return (500, "");
       }
     }
 
   }
 
-  Future<void> register(String email, String password, String username, BuildContext context) async {
+  Future<void> register(String email, String password, String username) async {
     try {
-      final res = await Api.dio.post(
+      await Api.dio.post(
         '/register',
         data: {
         'email': email,
         'password': password,
         'username': username
       });
-
       // Handle response and save information
-      if (res.statusCode == 200) {
-        final token = res.data['token'];
-        await saveToken(token);
-        await saveUsername(username);
-        await saveEmail(email);
-        await Api.setAuthToken(token);
+      // if (res.statusCode == 200) {
+      //   final token = res.data['token'];
+      //   await saveToken(token);
+      //   await saveUsername(username);
+      //   await saveEmail(email);
+      //   await Api.setAuthToken(token);
 
-        if(!context.mounted) return;
-        pushToHomeScreen(context, "");
-      }
+      //   // if(!context.mounted) return;
+      //   // pushToHomeScreen(context, "");
+      // }
     } catch (e) {
       print("ERROR REGISTERING: $e");
     }
