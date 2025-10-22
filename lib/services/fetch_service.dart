@@ -168,6 +168,49 @@ class FetchService {
   // }
 
 
+Future<dynamic> checkFormInput(String username, String email) async {
+    print("CHECKONG EXIST");
+    Uri url = Uri.parse('$baseUrl/exists');
+
+    // Send a GET request
+    try {
+      final response = await Api.dio.get(
+        url.toString(),
+        queryParameters: {
+          'username': username,
+          'email': email
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: ResponseType.json,
+        ),
+        cancelToken: _cancelToken,
+      );
+
+      // return response.data;
+      return Map<String, bool>.from(response.data);
+
+    } 
+    catch (e) {
+      if (e is DioException) {
+        if (CancelToken.isCancel(e)) {
+          log("Request was cancelled!");
+          return {'username': true, 'email': true};
+        }
+
+        // Read response data even on error status
+        if (e.response != null) {
+          return e.response!.data;
+        }
+      }
+
+      print("Fetch failed: $e");
+      return {'username': true, 'email': true};
+    }
+  }
+
    
   void cancelUpload() {
     _cancelToken?.cancel("Upload cancelled by user");

@@ -8,6 +8,7 @@ import 'package:photo_album/auth/blocked_email.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/text_field.dart';
 import 'package:photo_album/pages/login_screen.dart';
+import 'package:photo_album/services/fetch_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -35,6 +36,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool passwordTouched = false;
   bool blockedEmail = false;
 
+  bool userNameTaken = false;
+  bool emailTaken = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,14 +48,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _confirmEmailController.addListener(listener);
     _pwdController.addListener(listener);
 
-    _usernameFocus.addListener(() {if (!_usernameFocus.hasFocus) {setState(() => usernameTouched = true);}});
-    _emailFocus.addListener(() {if (!_emailFocus.hasFocus) {
-      setState(() => emailTouched = true);
-      if(isBlockedEmail(_emailController.text.trim())){blockedEmail = true;}
-      else{blockedEmail = false;}
-    }});
+    _usernameFocus.addListener(() async {
+      if (!_usernameFocus.hasFocus) {
+        setState(() => usernameTouched = true);
+
+        // Check for username input only
+        final val = await _checkInput(_usernameController.text, "");
+        if (val['username'] == true) {
+          setState(() => userNameTaken = true);
+        } else {
+          setState(() => userNameTaken = false);
+        }
+      }
+    });
+
+    _emailFocus.addListener(() async {
+      if (!_emailFocus.hasFocus) {
+        if(isBlockedEmail(_emailController.text.trim()) || !_emailController.text.contains("@")){
+          blockedEmail = true;
+          emailTaken = false;
+        }
+        else{
+          blockedEmail = false;
+
+          // Check for email input only
+          final val = await _checkInput("", _emailController.text);
+
+          if (val['email'] == true) {
+            setState(() => emailTaken = true);
+          } else {
+            setState(() => emailTaken = false);
+          }
+        }
+        setState(() => emailTouched = true,);
+      }
+    });
+    
     _confirmEmailFocus.addListener(() {if (!_confirmEmailFocus.hasFocus) {setState(() => confirmEmailTouched = true);}});
+    
     _pwdFocus.addListener(() {if (!_pwdFocus.hasFocus) {setState(() => passwordTouched = true);}});
+  }
+
+  Future<dynamic> _checkInput(username, email) async {
+    try {
+       final res = await FetchService().checkFormInput(
+        username,
+        email,
+      );
+      return res;
+
+    } catch (e) {
+      print("Error checking username/email: $e");
+        return {"username": true, "email": true};
+    }
   }
 
   @override
@@ -74,6 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     else if(_pwdController.text.isEmpty) {return false;}
     else if(blockedEmail) {return false;}
     else if(_emailController.text != _confirmEmailController.text) {return false;}
+    else if(emailTaken || userNameTaken) {return false;}
 
     return true;
   }
@@ -154,6 +204,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: TextStyle(color: Colors.red),
                         ),
                       ],
+                      if(!showErrorUsername && userNameTaken) ... [
+                        SizedBox(height: 3,),
+                        const Text(
+                          "Username already taken!",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
                       
                   
                       SizedBox(height: 10,),
@@ -172,10 +229,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: TextStyle(color: Colors.red),
                         ),
                       ],
-                      if(blockedEmail) ...[
+                      if(blockedEmail && !emailTaken) ...[
                         SizedBox(height: 3,),
                         Text(
                           "Please use a valid email",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                      if(!showErrorEmail && emailTaken) ... [
+                        SizedBox(height: 3,),
+                        const Text(
+                          "Email already in use!",
                           style: TextStyle(color: Colors.red),
                         ),
                       ],
