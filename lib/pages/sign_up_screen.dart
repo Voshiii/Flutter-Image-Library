@@ -52,12 +52,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!_usernameFocus.hasFocus) {
         setState(() => usernameTouched = true);
 
-        // Check for username input only
-        final val = await _checkInput(_usernameController.text, "");
-        if (val['username'] == true) {
-          setState(() => userNameTaken = true);
-        } else {
+        // Check if the username is available
+        final usernameAvailable = await FetchService().checkUsernameAvailable(_usernameController.text);
+        if(usernameAvailable){
           setState(() => userNameTaken = false);
+        } else{
+          setState(() => userNameTaken = true);
         }
       }
     });
@@ -71,13 +71,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         else{
           blockedEmail = false;
 
-          // Check for email input only
-          final val = await _checkInput("", _emailController.text);
-
-          if (val['email'] == true) {
-            setState(() => emailTaken = true);
-          } else {
+          // Check if the email is available
+          final mailAvailable = await FetchService().checkEmailvailable(_emailController.text);
+          if(mailAvailable){
             setState(() => emailTaken = false);
+          } else{
+            setState(() => emailTaken = true);
           }
         }
         setState(() => emailTouched = true,);
@@ -87,20 +86,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _confirmEmailFocus.addListener(() {if (!_confirmEmailFocus.hasFocus) {setState(() => confirmEmailTouched = true);}});
     
     _pwdFocus.addListener(() {if (!_pwdFocus.hasFocus) {setState(() => passwordTouched = true);}});
-  }
-
-  Future<dynamic> _checkInput(username, email) async {
-    try {
-       final res = await FetchService().checkFormInput(
-        username,
-        email,
-      );
-      return res;
-
-    } catch (e) {
-      print("Error checking username/email: $e");
-        return {"username": true, "email": true};
-    }
   }
 
   @override

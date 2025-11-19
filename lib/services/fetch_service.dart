@@ -14,13 +14,14 @@ class FetchService {
 
   final _folderController = StreamController<List<dynamic>>.broadcast();
 
-  final _folderNameController = StreamController<Map<String, dynamic>>.broadcast();
+  final _folderNameController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
-  Stream<Map<String, dynamic>> fetchInstantNames(String folderName){
+  Stream<Map<String, dynamic>> fetchInstantNames(String folderName) {
     fetchFileNames(folderName);
     return _folderNameController.stream;
   }
- 
+
   // Get folder item names and metaData
   Future<void> fetchFileNames(String folderPath) async {
     final username = await AuthService.getUsername();
@@ -29,27 +30,22 @@ class FetchService {
     Uri url = Uri.parse('$baseUrl/uploads/names/$username/$encodedPath');
 
     try {
-      final response = await Api.dio.get(
-        url.toString(),
-        options: Options(
-          headers: { 
-            'Content-Type': 'application/json',
-          },
-          responseType: ResponseType.json,
-        ),
-        cancelToken: _cancelToken
-      );
+      final response = await Api.dio.get(url.toString(),
+          options: Options(
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            responseType: ResponseType.json,
+          ),
+          cancelToken: _cancelToken);
 
-      if(response.statusCode == 204){
+      if (response.statusCode == 204) {
         _folderNameController.add({});
-      }
-      else{
+      } else {
         final Map<String, dynamic> data = response.data['folderItems'];
-        _folderNameController.add(data);
+        _folderNameController.add(data); // Returns { [name]: { [details] } }
       }
-
-    } 
-    catch (e) {
+    } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
         print("Error getting file names!");
         _folderNameController.add({});
@@ -60,7 +56,7 @@ class FetchService {
     }
   }
 
-  Future<Map<String, dynamic>> temp() async{
+  Future<Map<String, dynamic>> temp() async {
     await Future.delayed(Duration(seconds: 2));
     return {};
   }
@@ -71,7 +67,8 @@ class FetchService {
     final username = await AuthService.getUsername();
 
     final encodedPath = Uri.encodeComponent(folderPath);
-    Uri url = Uri.parse('$baseUrl/uploads/fileContent/$username/$encodedPath/$fileName');
+    Uri url = Uri.parse(
+        '$baseUrl/uploads/fileContent/$username/$encodedPath/$fileName');
 
     // Send a GET request
     try {
@@ -88,9 +85,7 @@ class FetchService {
 
       final fileInfo = response.data;
       return fileInfo;
-
-    } 
-    catch (e) {
+    } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
         log("Error!");
         return {};
@@ -100,7 +95,6 @@ class FetchService {
       }
     }
   }
-
 
   // * Used to get all the files to share
   // Change this so no need for re-fetching?
@@ -121,7 +115,7 @@ class FetchService {
         cancelToken: _cancelToken,
       );
 
-      if(response.statusCode == 204){
+      if (response.statusCode == 204) {
         return [];
       }
 
@@ -130,8 +124,7 @@ class FetchService {
       final Map<String, dynamic> data = jsonDecode(jsonString);
 
       return List<dynamic>.from(data['images']);
-    } 
-    catch (e) {
+    } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
         print("Error!");
         return [];
@@ -167,19 +160,14 @@ class FetchService {
   //   }
   // }
 
+  Future<bool> checkUsernameAvailable(String username) async {
+    print("Checking username exists");
+    Uri url = Uri.parse('$baseUrl/exists/username');
 
-Future<dynamic> checkFormInput(String username, String email) async {
-    print("CHECKONG EXIST");
-    Uri url = Uri.parse('$baseUrl/exists');
-
-    // Send a GET request
     try {
       final response = await Api.dio.get(
         url.toString(),
-        queryParameters: {
-          'username': username,
-          'email': email
-        },
+        queryParameters: {'username': username},
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -189,29 +177,42 @@ Future<dynamic> checkFormInput(String username, String email) async {
         cancelToken: _cancelToken,
       );
 
-      // return response.data;
-      return Map<String, bool>.from(response.data);
-
-    } 
-    catch (e) {
-      if (e is DioException) {
-        if (CancelToken.isCancel(e)) {
-          log("Request was cancelled!");
-          return {'username': true, 'email': true};
-        }
-
-        // Read response data even on error status
-        if (e.response != null) {
-          return e.response!.data;
-        }
+      if (response.statusCode == 200) {
+        return true;
       }
-
-      print("Fetch failed: $e");
-      return {'username': true, 'email': true};
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
-   
+  Future<bool> checkEmailvailable(String email) async {
+    print("Checking username exists");
+    Uri url = Uri.parse('$baseUrl/exists/email');
+
+    try {
+      final response = await Api.dio.get(
+        url.toString(),
+        queryParameters: {'email': email},
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: ResponseType.json,
+        ),
+        cancelToken: _cancelToken,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void cancelUpload() {
     _cancelToken?.cancel("Upload cancelled by user");
   }
@@ -219,5 +220,4 @@ Future<dynamic> checkFormInput(String username, String email) async {
   void dispose() {
     _folderController.close();
   }
-
 }
