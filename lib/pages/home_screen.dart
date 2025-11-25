@@ -167,7 +167,8 @@ class _HomescreenState extends State<HomeScreen> {
         else if (snapshot.hasError) { return _buildNoWifi(); } 
         else if (!snapshot.hasData || snapshot.data!.isEmpty) { return _buildEmpty(); }
 
-        allFiles = snapshot.data!.keys.toList();
+        allFiles = snapshot.data!.keys.toList(); // Returns the names of files/directories
+        // snapshot.data -> returns { [name]: { [details] } }
 
         return FilesSearchAndGrid(
           allFiles: allFiles,

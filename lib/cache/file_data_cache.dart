@@ -8,7 +8,9 @@ class FileCacheHelper {
   static Map<String, String> cachedData = {}; // fileName -> bytes
 
   // Download file if not cached, return raw bytes
-  static Future<dynamic> getFileData(String fileName, String folderPath) async {
+  static Future<Uint8List> getFileData(String fileName, String folderPath) async {
+    print("Searching for: $fileName");
+
     // Data is already in the cache
      String? filePath = cachedData[fileName];
 
@@ -16,6 +18,7 @@ class FileCacheHelper {
     if (filePath != null) {
       final file = File(filePath);
       if (await file.exists()) {
+        print("In cache");
         return await file.readAsBytes();
       } else {
         // Path in cache but file got deleted, remove entry
@@ -30,9 +33,11 @@ class FileCacheHelper {
 
     if (await file.exists()) {
       cachedData[fileName] = filePath;
+      print("In disk");
       return await file.readAsBytes();
     }
 
+    print("Not in cache, calling fetch function");
     final response = await FetchService().fetchFile(folderPath,fileName);
     if (response.isNotEmpty) {
       final base64Str = response["data"] as String;
@@ -45,6 +50,8 @@ class FileCacheHelper {
     }
 
 
-    return null;
+    // return null;
+    // TODO Check if this works
+    return Uint8List(0);
   }
 }

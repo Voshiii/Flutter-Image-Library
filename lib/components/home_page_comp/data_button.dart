@@ -19,9 +19,9 @@ class DataButton extends StatefulWidget {
   // ! Change to "IconButton"
   const DataButton({
     super.key,
-    required this.parsedFileName,
+    required this.parsedFileName, //  Shorter file name e.g. "name...e.png"
     required this.onTap,
-    required this.data,
+    required this.data, // the information e.g. size or date added
     required this.isFile,
     required this.folderPath,
     required this.fullFileName,
@@ -167,6 +167,26 @@ class _DataButtonState extends State<DataButton> {
         // height: expanded ? 10 : 50,
         height: 50,
         fit: BoxFit.cover,
+      );
+    // Add more
+    } else if(widget.parsedFileName.endsWith(".mov") || widget.parsedFileName.endsWith(".mpv")){
+      // Handle video data -> thumbnail
+      // Add a video play button
+      handleDataImg(fileData);
+      previewContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.memory(
+            decodedBytes,
+            // height: expanded ? 10 : 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
+          Icon(
+            Icons.play_circle_outline,
+            color: const Color.fromARGB(255, 202, 202, 202),
+          ),
+        ],
       );
     } else if (widget.parsedFileName.endsWith('.pdf')) {
       // Handle pdf data

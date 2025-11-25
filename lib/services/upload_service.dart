@@ -32,7 +32,7 @@ class UploadService {
         options: Options(
           headers: {
             'Content-Type': 'multipart/form-data',
-            },
+          },
         ),
         cancelToken: _cancelToken,
         onSendProgress: (int sent, int total) {
