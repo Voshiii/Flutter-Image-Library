@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/settings_page_comp/filled_bar.dart';
+import 'package:photo_album/services/fetch_service.dart';
 
 class UserAccount extends StatefulWidget {
   const UserAccount({super.key});
@@ -15,8 +16,10 @@ class UserAccount extends StatefulWidget {
 class _UserAccountState extends State<UserAccount> {
   String? username;
   String? email;
-  double assignedStorage = 10; // Place holder
-  double usedStorage = 0.5; // Place holder
+  // double assignedStorage = 10; // Place holder
+  // double usedStorage = 0.5; // Place holder
+  int assignedStorage = 0; // Place holder
+  double usedStorage = 0.0; // Place holder
   bool faceIdPref = false; // Check if faceID is active to log in
 
 
@@ -26,13 +29,25 @@ class _UserAccountState extends State<UserAccount> {
     getCredentials();
   }
 
+  double bytesToGB(String? bytesStr) {
+    final bytes = double.tryParse(bytesStr ?? '0') ?? 0;
+    final gb = bytes / (1024 * 1024 * 1024);
+    return (gb * 100).roundToDouble() / 100; // rounded to 2 decimals
+  }
+
   void getCredentials() async {
     username = AuthService.currentUsername;
     final mail = await AuthService.getEmail();
     final pref = await AuthService.getFaceIdPref();
+    final storage = await FetchService.getStorageDetails();
+    final maxStorage = storage["maxStorage"];
+    final currStorage = bytesToGB(storage["storageUsed"]);
+
     setState(() {
       faceIdPref = pref;
       email = mail;
+      assignedStorage = int.parse(maxStorage ?? "0");
+      usedStorage = currStorage;
     });
   }
 
@@ -140,7 +155,7 @@ class _UserAccountState extends State<UserAccount> {
     
         SizedBox(height: 25,),
         Text(
-          "Usage",
+          "Usage & Privacy",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20
@@ -187,34 +202,7 @@ class _UserAccountState extends State<UserAccount> {
                   },
                 ),
                 _buildDivider(),
-              ]
-            )
-          )
-        ),
-    
-        SizedBox(height: 25,),
-        Text(
-          "Privacy",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20
-          ),
-        ),
-        SizedBox(height: 5,),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Material(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: Colors.grey, width: 2),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildDivider(),
-    
+
                 ListTile(
                   title: Text(
                     "Face ID",
@@ -239,9 +227,6 @@ class _UserAccountState extends State<UserAccount> {
                         )
                     ],
                   ),
-                  // onTap: () {
-                  //   print("TODO: Change face ID");
-                  // },
                 ),
                 _buildDivider(),
               ]

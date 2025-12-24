@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ColoredBar extends StatelessWidget {
   final double value;       // current number
-  final double maxValue;    // upper bound (max storage)
+  final int maxValue;    // upper bound (max storage)
 
   const ColoredBar({
     super.key,

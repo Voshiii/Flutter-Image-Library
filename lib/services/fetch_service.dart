@@ -30,14 +30,16 @@ class FetchService {
     Uri url = Uri.parse('$baseUrl/uploads/names/$username/$encodedPath');
 
     try {
-      final response = await Api.dio.get(url.toString(),
-          options: Options(
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            responseType: ResponseType.json,
-          ),
-          cancelToken: _cancelToken);
+      final response = await Api.dio.get(
+        url.toString(),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: ResponseType.json,
+        ),
+        cancelToken: _cancelToken
+      );
 
       if (response.statusCode == 204) {
         _folderNameController.add({});
@@ -213,6 +215,47 @@ class FetchService {
     }
   }
 
+  static Future<Map<String, String>> getStorageDetails() async {
+    final username = await AuthService.getUsername();
+    // Make API call
+    try {
+      final res = await Api.dio.get(
+        '/storageDetails/$username',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: ResponseType.json,
+        ),
+      );
+
+      if (res.statusCode == 200) {
+        // Returns storageUsed and MaxStorage
+        final data = res.data["storage"];
+        print(data);
+
+        return {
+          'maxStorage': data["maxStorage"].toString(),
+          'storageUsed': data["storageUsed"].toString(),
+        };
+      }
+    } on DioException catch (e) {
+      print("ERROR LOGGING IN: $e");
+      if (e.response != null) {
+        // Server responded with non-200
+        print("Issue retrieving data!");
+        return{};
+      } else {
+        // No response (e.g. network issue)
+        // Res code "500" will automatically show "Server error!" "Please try again later!"
+        print("Server issue!");
+        return{};
+      }
+    }
+    return{};
+  }
+
+
   void cancelUpload() {
     _cancelToken?.cancel("Upload cancelled by user");
   }
@@ -220,4 +263,5 @@ class FetchService {
   void dispose() {
     _folderController.close();
   }
+
 }
