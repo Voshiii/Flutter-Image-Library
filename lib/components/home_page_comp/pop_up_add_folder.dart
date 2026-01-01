@@ -49,35 +49,58 @@ class _PopUpAddFolderState extends State<PopUpAddFolder> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-      CupertinoAlertDialog(
+    return CupertinoAlertDialog(
       title: Text(
         "Folder name",
         style: TextStyle(fontSize: 22),
       ),
 
-      // ! Issue with the dialog
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              "Please enter new folder name",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            
-            CupertinoTextField(
-              controller: _textController,
-              placeholder: "Folder name",
-              style: TextStyle(
-              color: CupertinoTheme.of(context).brightness == Brightness.dark
-                  ? CupertinoColors.white
-                  : CupertinoColors.black,
+      content: Column(
+        // mainAxisSize: MainAxisSize.max,
+        children: [
+          Text(
+            "Please enter new folder name",
+            style: TextStyle(fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          
+          // Material(
+          //   child: CupertinoTextField(
+          //     controller: _textController,
+          //     placeholder: "Folder name",
+          //     style: TextStyle(
+          //     color: CupertinoTheme.of(context).brightness == Brightness.dark
+          //         ? CupertinoColors.white
+          //         : CupertinoColors.black,
+          //     ),
+          //   ),
+          // ),
+
+          SizedBox(
+            child: Material(
+              child: TextField(
+                controller: _textController,
+                autocorrect: false,
+                style: TextStyle(
+                  color: CupertinoTheme.of(context).brightness == Brightness.dark
+                      ? CupertinoColors.white
+                      : CupertinoColors.black,
+                ),
+
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Folder name',
+                  floatingLabelStyle: TextStyle(
+                    fontSize: 12, // size when it floats
+                  ),
+                ),
+                onTapOutside: (event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
       actions: [
         CupertinoDialogAction(
