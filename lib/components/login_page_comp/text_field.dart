@@ -36,13 +36,18 @@ class MyTextfield extends StatelessWidget {
           ],
           borderRadius: BorderRadius.circular(25),
         ),
+        // TODO Check how to simplify validation with built in functions TextFormField
         child: TextFormField(
           obscureText: obscureText, // hide passwords if true
           controller: controller,
+          autocorrect: false,
           autofillHints: autofillHints, // used to autofill saved passwords
           inputFormatters: inputFormatter, // can be used to limit number of words
           onEditingComplete: () {
             FocusScope.of(context).unfocus(); // dismiss keyboard
+          },
+          onTapOutside: (event) {
+            FocusManager.instance.primaryFocus?.unfocus();
           },
           focusNode: inputFocus,
           // autovalidateMode: AutovalidateMode.always,
