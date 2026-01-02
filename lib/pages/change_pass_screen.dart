@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/password_checker.dart';
 import 'package:photo_album/components/login_page_comp/text_field.dart';
+import 'package:photo_album/components/settings_page_comp/pop_up_verify.dart';
 
-class PasswordChangeScreen extends StatefulWidget {
-  const PasswordChangeScreen({super.key});
+class ChangePasswordScreen extends StatefulWidget {
+  final String email;
+  final String username;
+
+  const ChangePasswordScreen({
+    super.key,
+    required this.email,
+    required this.username,
+  });
 
   @override
-  State<PasswordChangeScreen> createState() => _PasswordChangeScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -23,8 +30,6 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   bool currPassTouched = false;
   bool newPassTouched = false;
   bool confirmPassTouched = false;
-
-  String username = "";
 
   // The new password should not be the old password
   bool checkPasswordDiff(String newPass, String currPass){
@@ -57,14 +62,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
     }
   }
 
-  setName() async {
-    username = await AuthService.getUsername() ?? "";
-  }
-
   @override
   void initState() {
     super.initState();
-    setName();
 
     _currentPasswordController.addListener(_onTextChanged);
     _newPasswordController.addListener(_onTextChanged);
@@ -146,7 +146,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
           ),
         ]
         // TODO: Check if this works
-        else if(checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)) ... [
+        else if(newPassTouched && checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)) ... [
           SizedBox(height: 3,),
           const Text(
             "The new password cannot be the same as the old one!",
@@ -180,13 +180,24 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
 
         MyButton(text: "Change password",
           onTap: () {
-            AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, username);
+            if(!showErrCurrPass && !showErrNewPass && !showErrConfirmPass && !confirmPassMismatch && !checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)){
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email,),
+              ).then((reload) {
+                if(reload == true){
+                  // refreshFiles();
+                }
+              });
+              // AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, username);
+            }
           },
           color: 
           _currentPasswordController.text.isEmpty ||
           _newPasswordController.text.isEmpty ||
           _confirmPasswordController.text.isEmpty ||
-          _newPasswordController.text != _confirmPasswordController.text
+          _newPasswordController.text != _confirmPasswordController.text ||
+          checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)
           ? const Color.fromARGB(255, 222, 222, 222)
           : Colors.white,
           showShadow: 

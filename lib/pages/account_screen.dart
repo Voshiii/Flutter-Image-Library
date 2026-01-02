@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/components/settings_page_comp/filled_bar.dart';
+import 'package:photo_album/pages/change_pass_screen.dart';
+import 'package:photo_album/pages/change_username_screen.dart';
 import 'package:photo_album/services/fetch_service.dart';
 
 class UserAccount extends StatefulWidget {
@@ -84,6 +86,7 @@ class _UserAccountState extends State<UserAccount> {
                             : "NOT LOGGED IN",
                         style: TextStyle(
                           color: Colors.grey,
+                          fontSize: 12
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -94,7 +97,10 @@ class _UserAccountState extends State<UserAccount> {
                     ],
                   ),
                   onTap: () {
-                    print("TODO: Change username");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChangeUsernameScreen(username: username!, email: email!,)),
+                    );
                   },
                 ),
                 _buildDivider(),
@@ -111,18 +117,11 @@ class _UserAccountState extends State<UserAccount> {
                             : "NOT LOGGED IN",
                         style: TextStyle(
                           color: Colors.grey,
+                          fontSize: 12
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Colors.grey,
                       ),
                     ],
                   ),
-                  onTap: () {
-                    print("TODO: Change email");
-                  },
                 ),
                 _buildDivider(),
         
@@ -134,7 +133,10 @@ class _UserAccountState extends State<UserAccount> {
                       // Placeholder
                       Text(
                         "••••••••••",
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12
+                        ),
                       ),
                       const SizedBox(width: 4),
                       const Icon(
@@ -144,7 +146,10 @@ class _UserAccountState extends State<UserAccount> {
                     ],
                   ),
                   onTap: () {
-                    print("TODO: Change password");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChangePasswordScreen(email: email!, username: username!,)),
+                    );
                   },
                 ),
                 _buildDivider(),
