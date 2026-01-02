@@ -44,7 +44,9 @@ class AuthService {
   static Future<void> saveFaceIDPref(bool preference) async {
     await _storage.write(key: 'activeFaceID', value: preference.toString()); // '.toString' -> can only save strings
   }
-  
+
+  // GETTERS
+
   // Get username
   static Future<String?> getUsername() async {
     return await _storage.read(key: 'username');
@@ -138,6 +140,28 @@ class AuthService {
       // }
     } catch (e) {
       print("ERROR REGISTERING: $e");
+    }
+    
+  }
+
+  static Future<bool> updatePassword(String currPassword, String newPassword, String username) async {
+    print("THE USERNAME: $username");
+    try {
+      final res = await Api.dio.put(
+        '/changePassword/$username',
+        data: {
+        'currPassword': currPassword,
+        'newPassword': newPassword
+      });
+
+      if(res.statusCode == 200){
+        return true;
+      }
+      return false;
+
+    } catch (e) {
+      print("ERROR CHANING PASSWORD: $e");
+      return false;
     }
     
   }

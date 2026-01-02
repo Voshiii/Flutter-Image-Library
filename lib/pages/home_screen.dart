@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide LinearGradient;
+import 'package:photo_album/animations/empty_folder_anim.dart';
 import 'package:photo_album/animations/loading_anim.dart';
 // import 'package:photo_album/animations/empty_folder_anim.dart';
 import 'package:photo_album/auth/auth.dart';
@@ -31,10 +32,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomescreenState extends State<HomeScreen> {
+  late final StreamController<Map<String, dynamic>> _controller;
+
   final FetchService _fetchService = FetchService();
   bool hasInternet = true;
 
-  final TextEditingController _searchController = TextEditingController();
   List<dynamic> allFiles = [];
 
   final GlobalKey _buttonKey = GlobalKey();
@@ -44,8 +46,19 @@ class _HomescreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    currentWindowFileStream = widget.fileStream;
+    _controller = StreamController<Map<String, dynamic>>.broadcast();
+    _listenToFolder(widget.currentFolderPath);
+    // currentWindowFileStream = widget.fileStream;
   }
+
+  void _listenToFolder(String folderPath) {
+  final fetchStream = _fetchService.fetchInstantNames(folderPath);
+
+  fetchStream.listen(
+    (data) => _controller.add(data),
+    onError: (e) => _controller.addError(e),
+  );
+}
 
 
   void _showOptionsMenu() {
@@ -111,26 +124,34 @@ class _HomescreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 
+  // Future<void> refreshFiles() async {
+  //   if (!mounted) return;
+  //   // ! CHANGE THIS
+  //   final localNameController = StreamController<Map<String, dynamic>>();
+
+  //   _fetchService.fetchInstantNames(widget.currentFolderPath).listen(
+  //     (data) {
+  //       localNameController.add(data);
+  //     },
+  //     onDone: () => localNameController.close(),
+  //     onError: (error) => localNameController.addError(error),
+  //   );
+
+  //   setState(() {
+  //     currentWindowFileStream = localNameController.stream;
+  //   });
+  // }
+
   Future<void> refreshFiles() async {
-    if (!mounted) return;
-    // ! CHANGE THIS
-    final localNameController = StreamController<Map<String, dynamic>>();
-
-    _fetchService.fetchInstantNames(widget.currentFolderPath).listen(
-      (data) {
-        localNameController.add(data);
-      },
-      onDone: () => localNameController.close(),
-      onError: (error) => localNameController.addError(error),
+    print("Refreshing");
+    final fetchStream = _fetchService.fetchInstantNames(widget.currentFolderPath);
+    fetchStream.listen(
+      (data) => _controller.add(data),
+      onError: (error) => _controller.addError(error),
     );
-
-    setState(() {
-      currentWindowFileStream = localNameController.stream;
-    });
   }
 
   String getParsedFileName(String fileName){
@@ -159,8 +180,10 @@ class _HomescreenState extends State<HomeScreen> {
   }
 
   Widget _buildBody() {
+    print("Test1 -> HomeScreen");
     return StreamBuilder<Map<String, dynamic>>(
-      stream: currentWindowFileStream,
+      // stream: currentWindowFileStream,
+      stream: _controller.stream,
       builder: (context, snapshot) {
         if(!hasInternet){ return _buildNoWifi(); }
         else if (snapshot.connectionState == ConnectionState.waiting) { return _buildFillFolder(); } 
@@ -170,7 +193,10 @@ class _HomescreenState extends State<HomeScreen> {
         allFiles = snapshot.data!.keys.toList(); // Returns the names of files/directories
         // snapshot.data -> returns { [name]: { [details] } }
 
+        print("Test2 -> HomeScreen");
+
         return FilesSearchAndGrid(
+          // key: ValueKey(widget.currentFolderPath),
           allFiles: allFiles,
           fileDataMap: snapshot.data!,
           currentFolderPath: widget.currentFolderPath,
@@ -204,8 +230,9 @@ class _HomescreenState extends State<HomeScreen> {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: IntrinsicHeight(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  // mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
+                    MyEmptyFolderAnim(),
                     Center(child: Text("No items found!")),
                   ],
                 ),

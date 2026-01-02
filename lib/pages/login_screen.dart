@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading = false;
 
+  // ! TODO FIX THIS: CHECK change_pass_screen.dart
   @override
   void initState() {
     super.initState();
@@ -111,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                           if(showErrorUsername) ... [
                             SizedBox(height: 3,),
                             const Text(
-                              "Please enter a username",
+                              "Please enter a username!",
                               style: TextStyle(color: Colors.red),
                             ),
                           ],
@@ -129,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                           if(showErrorPwd) ... [
                             SizedBox(height: 3,),
                             const Text(
-                              "Please enter a password",
+                              "Please enter a password!",
                               style: TextStyle(color: Colors.red),
                             ),
                           ],

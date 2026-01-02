@@ -23,7 +23,11 @@ void pushToHomeScreen(context, String transitionType) async {
     
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, animation, __) => HomeScreen(fileStream: localNameController.stream, currentFolderPath: username,),
+        pageBuilder: (_, animation, __) => HomeScreen(
+          // key: ValueKey(username),
+          fileStream: localNameController.stream,
+          currentFolderPath: username,
+        ),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -36,7 +40,11 @@ void pushToHomeScreen(context, String transitionType) async {
     // Push but with no Fade when logged in already
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen(fileStream: localNameController.stream, currentFolderPath: username)),
+      MaterialPageRoute(builder: (context) => HomeScreen(
+        // key: ValueKey(username),
+        fileStream: localNameController.stream,
+        currentFolderPath: username
+      )),
     );
   }
       

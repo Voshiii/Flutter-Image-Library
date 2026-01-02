@@ -54,6 +54,7 @@ class _DataButtonState extends State<DataButton> {
   void getData() async {
     if(widget.isFile){
       final newData = await FileCacheHelper.getFileData(widget.fullFileName, widget.folderPath);
+      if(!mounted) return;
       setState(() {
         fileData = newData;
       });
@@ -65,6 +66,7 @@ class _DataButtonState extends State<DataButton> {
     String isoDate = widget.data["modifiedAt"];
     DateTime date = DateTime.parse(isoDate);
     formattedDate = DateFormat('dd/MM/yyyy').format(date);
+    if(!mounted) return;
     setState(() {
       formattedDate = DateFormat('dd/MM/yyyy').format(date);
     });
@@ -79,6 +81,7 @@ class _DataButtonState extends State<DataButton> {
   void handleDataText(data){
     final base64Str = data ?? '';
     final decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Str;
+    if(!mounted) return;
     setState(() {
       decodedText = utf8.decode(decodedBytes);
     }); 
@@ -87,6 +90,7 @@ class _DataButtonState extends State<DataButton> {
   // Handle data if the file is an image
   void handleDataImg(data){
     final base64Str = data ?? '';
+    if(!mounted) return;
     setState(() {
       decodedBytes = base64Str.isEmpty ? Uint8List(0) : base64Str;
     });

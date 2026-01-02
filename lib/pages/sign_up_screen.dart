@@ -39,6 +39,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool userNameTaken = false;
   bool emailTaken = false;
 
+  // ! TODO FIX THIS: CHECK change_pass_screen.dart
+  // ! Add constraints to password
   @override
   void initState() {
     super.initState();
