@@ -1,13 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:photo_album/auth/verification.dart';
 import 'package:verification_code_field/verification_code_field.dart';
+import 'dart:async';
 
-class VeryifyDialog extends StatelessWidget {
+class VeryifyDialog extends StatefulWidget {
   final String userEmail;
+  final String username;
   const VeryifyDialog({
     super.key,
-    required this.userEmail
+    required this.userEmail,
+    required this. username
   });
 
+  @override
+  State<VeryifyDialog> createState() => _VeryifyDialogState();
+}
+
+class _VeryifyDialogState extends State<VeryifyDialog> {
+  int secondsLeft = 0;
+  Timer? _countdownTimer;
+
+  void startCountdown() {
+    print("Starting timer");
+    secondsLeft = 15;
+    _countdownTimer?.cancel();
+
+    _countdownTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        if (secondsLeft == -1) {
+          timer.cancel();
+        } else {
+          if(!mounted) return;
+          print("Setting state and secdondsLeft: $secondsLeft");
+          setState(() {
+            secondsLeft--;
+          });
+        }
+      },
+    );
+  }
+  
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -31,7 +70,7 @@ class VeryifyDialog extends StatelessWidget {
                 Text("Enter verification code sent to "),
                 
                 Text(
-                  userEmail,
+                  widget.userEmail,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     overflow: TextOverflow.visible,
@@ -69,7 +108,7 @@ class VeryifyDialog extends StatelessWidget {
             
                 VerificationCodeField(
                   codeDigit: CodeDigit.four,
-                  onSubmit: (value) => print("Submitted"),
+                  onSubmit: (value) => verifyCode(value, widget.username),
                   enabled: true,
                   filled: true,
                   showCursor: true,
@@ -89,10 +128,34 @@ class VeryifyDialog extends StatelessWidget {
 
                 SizedBox(height: 30,),
 
-                Text(
-                  "Resend code",
-                  style: TextStyle(
-                    color: Colors.blue
+                GestureDetector(
+                  onTap: () => {
+                    if(secondsLeft < 1){
+                      startCountdown(),
+                      sendVerificationCode(widget.username),
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Resend code",
+                        style: TextStyle(
+                          color: 
+                          secondsLeft > 0
+                          ? Colors.grey
+                          : Colors.blue
+                        ),
+                      ),
+                      secondsLeft > 0
+                      ? Text(
+                        " (in ${secondsLeft}s)",
+                        style: TextStyle(
+                          color: Colors.grey
+                        ),
+                      )
+                      : Text(""),
+                    ],
                   ),
                 ),
 

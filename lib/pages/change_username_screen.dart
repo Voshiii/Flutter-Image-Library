@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_album/auth/verification.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/text_field.dart';
 import 'package:photo_album/components/settings_page_comp/pop_up_verify.dart';
@@ -97,9 +98,10 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
               text: "Change username",
               onTap: () {
                 if(_usernameController.text.isNotEmpty || !usernameSame){
+                  sendVerificationCode(widget.username);
                   showDialog(
                     context: context,
-                    builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email,),
+                    builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: widget.username),
                   );
                   // AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, username);
                 }
