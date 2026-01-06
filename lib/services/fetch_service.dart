@@ -189,7 +189,7 @@ class FetchService {
   }
 
   Future<bool> checkEmailvailable(String email) async {
-    print("Checking username exists");
+    print("Checking email exists");
     Uri url = Uri.parse('$baseUrl/exists/email');
 
     try {

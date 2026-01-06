@@ -27,7 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FocusNode _confirmEmailFocus = FocusNode();
   final FocusNode _pwdFocus = FocusNode();
   final FocusNode _usernameFocus = FocusNode();
-  
+
   final AuthService _authService = AuthService();
 
   bool emailTouched = false;
@@ -39,7 +39,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool userNameTaken = false;
   bool emailTaken = false;
 
-  // ! TODO FIX THIS: CHECK change_pass_screen.dart
   // ! Add constraints to password
   @override
   void initState() {
@@ -55,10 +54,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         setState(() => usernameTouched = true);
 
         // Check if the username is available
-        final usernameAvailable = await FetchService().checkUsernameAvailable(_usernameController.text);
-        if(usernameAvailable){
+        if (_usernameController.text.isEmpty) return;
+        final usernameAvailable = await FetchService()
+            .checkUsernameAvailable(_usernameController.text);
+        if (usernameAvailable) {
           setState(() => userNameTaken = false);
-        } else{
+        } else {
           setState(() => userNameTaken = true);
         }
       }
@@ -66,28 +67,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     _emailFocus.addListener(() async {
       if (!_emailFocus.hasFocus) {
-        if(isBlockedEmail(_emailController.text.trim()) || !_emailController.text.contains("@")){
+        if (isBlockedEmail(_emailController.text.trim()) ||
+            !_emailController.text.contains("@")) {
           blockedEmail = true;
           emailTaken = false;
-        }
-        else{
+        } else {
           blockedEmail = false;
 
           // Check if the email is available
-          final mailAvailable = await FetchService().checkEmailvailable(_emailController.text);
-          if(mailAvailable){
+          if (_emailController.text.isEmpty) return;
+          final mailAvailable =
+              await FetchService().checkEmailvailable(_emailController.text);
+          if (mailAvailable) {
             setState(() => emailTaken = false);
-          } else{
+          } else {
             setState(() => emailTaken = true);
           }
         }
-        setState(() => emailTouched = true,);
+        setState(
+          () => emailTouched = true,
+        );
       }
     });
-    
-    _confirmEmailFocus.addListener(() {if (!_confirmEmailFocus.hasFocus) {setState(() => confirmEmailTouched = true);}});
-    
-    _pwdFocus.addListener(() {if (!_pwdFocus.hasFocus) {setState(() => passwordTouched = true);}});
+
+    _confirmEmailFocus.addListener(() {
+      if (!_confirmEmailFocus.hasFocus) {
+        setState(() => confirmEmailTouched = true);
+      }
+    });
+
+    _pwdFocus.addListener(() {
+      if (!_pwdFocus.hasFocus) {
+        setState(() => passwordTouched = true);
+      }
+    });
   }
 
   @override
@@ -103,262 +116,253 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  bool checkFormIsValid(){
-    if (_usernameController.text.isEmpty) {return false;}
-    else if(_emailController.text.isEmpty) {return false;}
-    else if(_confirmEmailController.text.isEmpty) {return false;}
-    else if(_pwdController.text.isEmpty) {return false;}
-    else if(blockedEmail) {return false;}
-    else if(_emailController.text != _confirmEmailController.text) {return false;}
-    else if(emailTaken || userNameTaken) {return false;}
+  bool checkFormIsValid() {
+    if (_usernameController.text.isEmpty) {
+      return false;
+    } else if (_emailController.text.isEmpty) {
+      return false;
+    } else if (_confirmEmailController.text.isEmpty) {
+      return false;
+    } else if (_pwdController.text.isEmpty) {
+      return false;
+    } else if (blockedEmail) {
+      return false;
+    } else if (_emailController.text != _confirmEmailController.text) {
+      return false;
+    } else if (emailTaken || userNameTaken) {
+      return false;
+    }
 
     return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    final showErrorUsername = usernameTouched && _usernameController.text.isEmpty;
+    final showErrorUsername =
+        usernameTouched && _usernameController.text.isEmpty;
     final showErrorEmail = emailTouched && _emailController.text.isEmpty;
-    final showErrorconfirmEmail = confirmEmailTouched && _confirmEmailController.text.isEmpty;
+    final showErrorconfirmEmail =
+        confirmEmailTouched && _confirmEmailController.text.isEmpty;
     final showErrorPwd = passwordTouched && _pwdController.text.isEmpty;
 
     return Scaffold(
-      // resizeToAvoidBottomInset: true, // ! TODO: there is an overflow issue when the keyboard pops up
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).unfocus(); // Unfocus all text fields
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade300,
-                Colors.purple.shade200,
-              ],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue.shade300,
+              Colors.purple.shade200,
+            ],
           ),
-          child: SafeArea(
-            child: Stack(
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SingleChildScrollView(
-                  padding: EdgeInsets.only(top: 80),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Welcome to",
-                        style: GoogleFonts.blinker(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30
-                        ),
+                    Text(
+                      "Welcome to",
+                      style: GoogleFonts.blinker(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30
                       ),
-                      Text(
-                        "Voshi's Cloud",
-                        style: GoogleFonts.blinker(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 60
-                        ),
+                    ),
+                    Text(
+                      "Voshi's Cloud",
+                      style: GoogleFonts.blinker(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 60
                       ),
-                      
-                      SizedBox(height: 30,),
+                    ),
                                 
-                      Text(
-                        "Create your account to get started!",
-                        style: GoogleFonts.blinker(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
+                    SizedBox(height: 30,),
                                 
-                      SizedBox(height: 10,),
-
-                      // Text fields for signup
-                      MyTextfield(
-                        hintText: "Username",
-                        obscureText: false,
-                        controller: _usernameController,
-                        inputFormatter: [
-                          LengthLimitingTextInputFormatter(12),
-                        ],
-                        inputFocus: _usernameFocus,
-                        touched: usernameTouched,
+                    Text(
+                      "Create your account to get started!",
+                      style: GoogleFonts.blinker(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold
                       ),
-                      if(showErrorUsername) ... [
-                        SizedBox(height: 3,),
-                        const Text(
-                          "Please enter a username",
-                          style: TextStyle(color: Colors.red),
-                        ),
+                    ),
+                                
+                    SizedBox(height: 10,),
+                                
+                    // Text fields for signup
+                    MyTextfield(
+                      hintText: "Username",
+                      obscureText: false,
+                      controller: _usernameController,
+                      inputFormatter: [
+                        LengthLimitingTextInputFormatter(12),
                       ],
-                      if(!showErrorUsername && userNameTaken) ... [
-                        SizedBox(height: 3,),
-                        const Text(
-                          "Username already taken!",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                      
-                  
-                      SizedBox(height: 10,),
-
-                      MyTextfield(
-                        hintText: "Email address",
-                        obscureText: false,
-                        controller: _emailController,
-                        inputFocus: _emailFocus,
-                        touched: emailTouched,
-                      ),
-                      
-                      if(showErrorEmail) ...[
-                        SizedBox(height: 3,),
-                        const Text(
-                          "Please enter an email",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                      if(blockedEmail && !emailTaken) ...[
-                        SizedBox(height: 3,),
-                        Text(
-                          "Please use a valid email",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                      if(!showErrorEmail && emailTaken) ... [
-                        SizedBox(height: 3,),
-                        const Text(
-                          "Email already in use!",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-
-                      SizedBox(height: 10,),
-
-                      MyTextfield(
-                        hintText: "Confirm email address",
-                        obscureText: false,
-                        controller: _confirmEmailController,
-                        inputFocus: _confirmEmailFocus,
-                        touched: confirmEmailTouched,
-                      ),
-                      if(showErrorconfirmEmail) ...[
-                        SizedBox(height: 3,),
-                        Text(
-                          "Please re-enter your valid email",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                      if(_emailController.text != _confirmEmailController.text && confirmEmailTouched && !showErrorconfirmEmail) ... [
-                        SizedBox(height: 3,),
-                        Text(
-                          "Your emails do not match",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                  
-                      SizedBox(height: 10,),
-                  
-                      MyTextfield(
-                        // TODO ADD password enforcements
-                        hintText: "Password",
-                        obscureText: true,
-                        controller: _pwdController,
-                        inputFocus: _pwdFocus,
-                        touched: passwordTouched,
-                      ),
+                      inputFocus: _usernameFocus,
+                      touched: usernameTouched,
+                    ),
+                    if(showErrorUsername) ... [
                       SizedBox(height: 3,),
-                      if(showErrorPwd) ... [
-                        SizedBox(height: 3,),
-                        const Text(
-                          "Please enter a password",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                  
-                      SizedBox(height: 30,),
-                  
-                      MyButton(
-                        text: "Sign up",
-                        onTap: () => {
-                          if(
-                            // _emailController.text.isNotEmpty && 
-                            // _pwdController.text.isNotEmpty && 
-                            // _usernameController.text.isNotEmpty &&
-                            // _confirmEmailController.text.isNotEmpty &&
-                            checkFormIsValid()
-                            ){
-                            _authService.register(
-                              _emailController.text,
-                              _pwdController.text,
-                              _usernameController.text,
-                            ),
-                            // Push back to login. User must first verify their email before they can log in
-
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => signUpSuccess(),
-                            ),
-                          },
-                        },
-                        color:
-                        //  _emailController.text.isEmpty || _pwdController.text.isEmpty || _usernameController.text.isEmpty
-                        !checkFormIsValid()
-                        ? const Color.fromARGB(255, 222, 222, 222)
-                        : Colors.white, // Valid
-                        showShadow:
-                        // _emailController.text.isEmpty || _pwdController.text.isEmpty || _usernameController.text.isEmpty
-                        !checkFormIsValid()
-                        ? false
-                        : true
+                      const Text(
+                        "Please enter a username",
+                        style: TextStyle(color: Colors.red),
                       ),
                     ],
-                  ),
-                ),
-
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Text.rich(
-                      TextSpan(
-                        // ! TODO: Fix this overflow issue with the keyboard
-                        text: "Already have an account? ",
-                        style: TextStyle(fontSize: 18, color: Colors.black),
-                        children: [
-                          TextSpan(
-                            text: "Login Now",
-                            style: TextStyle(
+                    if(!showErrorUsername && userNameTaken) ... [
+                      SizedBox(height: 3,),
+                      const Text(
+                        "Username already taken!",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                                
+                    SizedBox(height: 10,),
+                                
+                    MyTextfield(
+                      hintText: "Email address",
+                      obscureText: false,
+                      controller: _emailController,
+                      inputFocus: _emailFocus,
+                      touched: emailTouched,
+                    ),
+                                
+                    if(showErrorEmail) ...[
+                      SizedBox(height: 3,),
+                      const Text(
+                        "Please enter an email",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ]
+                    else if(blockedEmail && !emailTaken) ...[
+                      SizedBox(height: 3,),
+                      Text(
+                        "Please use a valid email",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ]
+                    else if(!showErrorEmail && emailTaken) ... [
+                      SizedBox(height: 3,),
+                      const Text(
+                        "Email already in use!",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                                
+                    SizedBox(height: 10,),
+                                
+                    MyTextfield(
+                      hintText: "Confirm email address",
+                      obscureText: false,
+                      controller: _confirmEmailController,
+                      inputFocus: _confirmEmailFocus,
+                      touched: confirmEmailTouched,
+                    ),
+                    if(showErrorconfirmEmail) ...[
+                      SizedBox(height: 3,),
+                      Text(
+                        "Please re-enter your valid email",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    if(_emailController.text != _confirmEmailController.text && confirmEmailTouched && !showErrorconfirmEmail) ... [
+                      SizedBox(height: 3,),
+                      Text(
+                        "Your emails do not match",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                                
+                    SizedBox(height: 10,),
+                                
+                    MyTextfield(
+                      // TODO ADD password enforcements
+                      hintText: "Password",
+                      obscureText: true,
+                      controller: _pwdController,
+                      inputFocus: _pwdFocus,
+                      touched: passwordTouched,
+                    ),
+                    SizedBox(height: 3,),
+                    if(showErrorPwd) ... [
+                      SizedBox(height: 3,),
+                      const Text(
+                        "Please enter a password",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                                
+                    SizedBox(height: 30,),
+                                
+                    MyButton(
+                      text: "Sign up",
+                      onTap: () => {
+                        if(
+                          checkFormIsValid()
+                          ){
+                          _authService.register(
+                            _emailController.text,
+                            _pwdController.text,
+                            _usernameController.text,
+                          ),
+                          // Push back to login. User must first verify their email before they can log in
+                                
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => signUpSuccess(),
+                          ),
+                        },
+                      },
+                      color:
+                      //  _emailController.text.isEmpty || _pwdController.text.isEmpty || _usernameController.text.isEmpty
+                      !checkFormIsValid()
+                      ? const Color.fromARGB(255, 222, 222, 222)
+                      : Colors.white, // Valid
+                      showShadow:
+                      // _emailController.text.isEmpty || _pwdController.text.isEmpty || _usernameController.text.isEmpty
+                      !checkFormIsValid()
+                      ? false
+                      : true
+                    ),
+                // ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20, top: 30),
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Already have an account? ",
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: "Login Now",
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
                               decoration: TextDecoration.underline,
-                              decorationColor: Colors.blue
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  PageRouteBuilder(
-                                    transitionDuration: Duration(milliseconds: 160),
-                                    pageBuilder: (_, __, ___) => LoginPage(),
-                                    transitionsBuilder: (_, animation, __, child) {
-                                      final offset = Tween<Offset>(
-                                        begin: Offset(-1, 0),  // From left
-                                        end: Offset.zero,
-                                      ).animate(animation);
-                  
-                                      return SlideTransition(position: offset, child: child);
-                                    },
-                                  ),
-                                );
-                              },
-                          ),
-                        ],
-                      ),
+                              decorationColor: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushReplacement(
+                                context,
+                                PageRouteBuilder(
+                                  transitionDuration:
+                                      Duration(milliseconds: 160),
+                                  pageBuilder: (_, __, ___) => LoginPage(),
+                                  transitionsBuilder:
+                                      (_, animation, __, child) {
+                                    final offset = Tween<Offset>(
+                                      begin: Offset(-1, 0), // From left
+                                      end: Offset.zero,
+                                    ).animate(animation);
+                
+                                    return SlideTransition(
+                                        position: offset, child: child);
+                                  },
+                                ),
+                              );
+                            },
+                        ),
+                      ],
                     ),
                   ),
                 )
-
               ],
             ),
           ),
@@ -367,10 +371,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget signUpSuccess(){
+  Widget signUpSuccess() {
     return CupertinoAlertDialog(
       title: Text("Successfully created account!"),
-      content: Text("An email has been sent to verify your account.\nPlease check your spam email as well."),
+      content: Text(
+          "An email has been sent to verify your account.\nPlease check your spam email as well."),
       actions: [
         CupertinoDialogAction(
           child: Text(
@@ -380,7 +385,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           onPressed: () => {
             // Remove popup
             Navigator.pop(context),
-            
+
             // Move back to login page
             Navigator.pushReplacement(
               context,
@@ -389,7 +394,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 pageBuilder: (_, __, ___) => LoginPage(),
                 transitionsBuilder: (_, animation, __, child) {
                   final offset = Tween<Offset>(
-                    begin: Offset(-1, 0),  // From left
+                    begin: Offset(-1, 0), // From left
                     end: Offset.zero,
                   ).animate(animation);
 
