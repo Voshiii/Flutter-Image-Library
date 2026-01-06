@@ -10,14 +10,16 @@ class AuthService {
   static final _storage = const FlutterSecureStorage(); // Save information on device
   String baseUrl = dotenv.env['BASE_URL'] ?? ''; // API link, currently in .env (Not in GitHub)
 
-  // ! Save the token and username as variables? So no overhead to await?
+  // ! TODO Save the token and username as variables? So no overhead to await?
   static String? currentUsername = "NOT LOGGED IN";
+  static final ValueNotifier<String?> currentUsernameTest = ValueNotifier("NOT LOGGED IN");
 
   // ! Change this for a better confirmation to be logged in
   static Future<bool> isLoggedIn() async {
     final res = await _storage.read(key: "token") != null
     && await _storage.read(key: "username") != null;
     if(res) currentUsername = await _storage.read(key: "username");
+    if(res) currentUsernameTest.value = await _storage.read(key: "username");
     return res;
     
     // ! REMOVE THIS FOR PROD
@@ -33,6 +35,7 @@ class AuthService {
   static Future<void> saveUsername(String username) async {
     await _storage.write(key: 'username', value: username);
     currentUsername = username;
+    currentUsernameTest.value = username;
   }
 
   // Save user email
@@ -67,14 +70,15 @@ class AuthService {
     return await _storage.read(key: 'activeFaceID') == "true";
   }
 
-  // Delete all saved items
-  static Future<void> clearTokenandUsername() async {
-    await _storage.delete(key: "token");
-    await _storage.delete(key: "username");
-    await _storage.delete(key: "email");
-    await _storage.delete(key: "activeFaceID");
-    currentUsername = "NOT LOGGED IN";
-  }
+  // // Delete all saved items
+  // static Future<void> clearTokenandUsername() async {
+  //   await _storage.delete(key: "token");
+  //   await _storage.delete(key: "username");
+  //   await _storage.delete(key: "email");
+  //   await _storage.delete(key: "activeFaceID");
+  //   currentUsername = "NOT LOGGED IN";
+  //   currentUsernameTest.value = "NOT LOGGED IN";
+  // }
 
   // logout and remove items
   static Future<void> logout() async {
@@ -142,6 +146,26 @@ class AuthService {
       print("ERROR REGISTERING: $e");
     }
     
+  }
+
+  static Future<bool> updateUsername(String currUsername, String newUsername) async {
+    try {
+      final res = await Api.dio.put(
+        '/changeUsername/$currUsername',
+        data: {
+        'newUsername': newUsername
+      });
+
+      if(res.statusCode == 200){
+        saveToken(res.data["token"]);
+        Api.setAuthToken(res.data["token"]);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("ERROR CHANING USERNAME: $e");
+      return false;
+    }
   }
 
   static Future<bool> updatePassword(String currPassword, String newPassword, String username) async {

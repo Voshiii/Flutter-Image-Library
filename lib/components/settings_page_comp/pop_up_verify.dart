@@ -108,9 +108,14 @@ class _VeryifyDialogState extends State<VeryifyDialog> {
             
                 VerificationCodeField(
                   codeDigit: CodeDigit.four,
-                  onSubmit: (value) => verifyCode(value, widget.username),
+                  onSubmit: (value) async {
+                    final res = await verifyCode(value, widget.username);
+                    if(!context.mounted) return;
+                    Navigator.of(context).pop(res);
+                  },
                   enabled: true,
                   filled: true,
+                  autoFocus: true,
                   showCursor: true,
                   cursorColor: Colors.blue,
                   border: const OutlineInputBorder(

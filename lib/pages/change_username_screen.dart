@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/verification.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/text_field.dart';
@@ -64,61 +65,116 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
           ),
         ),
       ),
-      body: Center(
-        child: Column(
+      body: SafeArea(
+        child: Stack(
           children: [
-            MyTextfield(
-              hintText: "New username",
-              obscureText: false,
-              controller: _usernameController,
-              inputFocus: _usernameFocus
+            Center(
+              child: Column(
+                children: [
+                  MyTextfield(
+                    hintText: "New username",
+                    obscureText: false,
+                    controller: _usernameController,
+                    inputFocus: _usernameFocus,
+                    touched: usernameTouched,
+                  ),
+                  if(usernameTouched && _usernameController.text.isEmpty) ... [
+                    SizedBox(height: 3,),
+                    Text(
+                      "Field cannot be empty!",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ]
+                  else if(usernameSame) ... [
+                    SizedBox(height: 3,),
+                    Text(
+                      "Username can't be the same!",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+            
+                  SizedBox(height: 10,),
+            
+                  // MyButton(
+                  //   text: "Change username",
+                  //   onTap: () async {
+                  //     if(_usernameController.text.isNotEmpty && !usernameSame){
+                  //       sendVerificationCode(widget.username);
+                  //       final result = await showDialog(
+                  //         context: context,
+                  //         builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: widget.username),
+                  //       );
+                  //       if(result){
+                  //         final res = await AuthService.updateUsername(widget.username, _usernameController.text);
+                  //         if(res) {
+                  //           AuthService.saveUsername(_usernameController.text);
+                  //         }
+                  //       }
+                  //     }
+                  //   },
+                  //   color: 
+                  //   _usernameController.text.isEmpty ||
+                  //   usernameSame
+                  //   ? const Color.fromARGB(255, 222, 222, 222)
+                  //   : Colors.white,
+                  //   showShadow: 
+                  //   _usernameController.text.isEmpty || 
+                  //   usernameSame
+                  //   ? false
+                  //   : true,
+                  // )
+            
+                ],
+              ),
             ),
-            if(usernameTouched && _usernameController.text.isEmpty) ... [
-              SizedBox(height: 3,),
-              Text(
-                "Field cannot be empty!",
-                style: TextStyle(
-                  color: Colors.red,
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SizedBox(
+                  height: 70,
+                  // ! TODO change the currentUsernameTest to a solid variable which is used everywhere
+                  child: MyButton(
+                        text: "Change username",
+                        onTap: () async {
+                          if(_usernameController.text.isNotEmpty && !usernameSame){
+                            sendVerificationCode(AuthService.currentUsernameTest.value!);
+                            final result = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: AuthService.currentUsernameTest.value!),
+                            );
+                            if(result){
+                              final res = await AuthService.updateUsername(AuthService.currentUsernameTest.value!, _usernameController.text);
+                              if(res) {
+                                AuthService.saveUsername(_usernameController.text);
+                                _usernameController.clear();
+                                setState(() {
+                                  usernameTouched = false;
+                                });
+                              }
+                            }
+                          }
+                        },
+                        color: 
+                        _usernameController.text.isEmpty ||
+                        usernameSame
+                        ? const Color.fromARGB(88, 222, 222, 222)
+                        : Colors.white,
+                        showShadow: 
+                        _usernameController.text.isEmpty || 
+                        usernameSame
+                        ? false
+                        : true,
+                      ),
                 ),
               ),
-            ]
-            else if(usernameSame) ... [
-              SizedBox(height: 3,),
-              Text(
-                "Username can't be the same!",
-                style: TextStyle(
-                  color: Colors.red,
-                ),
-              ),
-            ],
-
-            SizedBox(height: 10,),
-
-            MyButton(
-              text: "Change username",
-              onTap: () {
-                if(_usernameController.text.isNotEmpty || !usernameSame){
-                  sendVerificationCode(widget.username);
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: widget.username),
-                  );
-                  // AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, username);
-                }
-              },
-              color: 
-              _usernameController.text.isEmpty ||
-              usernameSame
-              ? const Color.fromARGB(255, 222, 222, 222)
-              : Colors.white,
-              showShadow: 
-              _usernameController.text.isEmpty || 
-              usernameSame
-              ? false
-              : true,
-            )
-
-          ],
+            ),
+            // SizedBox(height: 40,)
+          ]
         ),
       ),
     );

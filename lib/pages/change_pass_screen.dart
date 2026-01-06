@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/verification.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/password_checker.dart';
@@ -104,110 +105,138 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final showErrConfirmPass = confirmPassTouched && _confirmPasswordController.text.isEmpty && !_confirmPasswFocus.hasFocus;
     final confirmPassMismatch = confirmPassTouched && _confirmPasswordController.text.isNotEmpty && _newPasswordController.text != _confirmPasswordController.text;
 
-    return Column(
-      children: [
-        MyTextfield(hintText: "Current password",
-          obscureText: true,
-          controller: _currentPasswordController,
-          inputFocus: _currentPasswFocus
-        ),
-        if(showErrCurrPass) ... [
-          SizedBox(height: 3,),
-          const Text(
-            "Please enter your current password!",
-            style: TextStyle(color: Colors.red),
+    return SafeArea(
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              MyTextfield(hintText: "Current password",
+                obscureText: true,
+                controller: _currentPasswordController,
+                inputFocus: _currentPasswFocus,
+                touched: currPassTouched,
+              ),
+              if(showErrCurrPass) ... [
+                SizedBox(height: 3,),
+                const Text(
+                  "Please enter your current password!",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ],
+          
+              SizedBox(height: 10,),
+          
+              MyTextfield(hintText: "New password",
+                obscureText: true,
+                controller: _newPasswordController,
+                inputFocus: _newPasswFocus,
+                touched: newPassTouched,
+              ),
+              if(showErrNewPass) ... [
+                SizedBox(height: 3,),
+                const Text(
+                  "Please enter your new password!",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ]
+              else if(newPassTouched && !checkPasswordConstraints(_newPasswordController.text)) ... [
+                SizedBox(height: 3,),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30, right: 30),
+                  child: const Text(
+                    "Your password must be at least 8 characters long and include special characters!",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12
+                    ),
+                  ),
+                ),
+              ]
+              // TODO: Check if this works
+              else if(newPassTouched && checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)) ... [
+                SizedBox(height: 3,),
+                const Text(
+                  "The new password cannot be the same as the old one!",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ], 
+          
+              SizedBox(height: 10,),
+          
+              MyTextfield(hintText: "Confirm password",
+                obscureText: true,
+                controller: _confirmPasswordController,
+                inputFocus: _confirmPasswFocus,
+                touched: confirmPassTouched,
+              ),
+              if(showErrConfirmPass) ... [
+                SizedBox(height: 3,),
+                const Text(
+                  "Please confirm your new password!",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ]
+              else if(confirmPassMismatch) ... [
+                SizedBox(height: 3,),
+                const Text(
+                  "Your passwords do not match!",
+                  style: TextStyle(color: Colors.red,),
+                ),
+              ],
+          
+              SizedBox(height: 20,),
+          
+              
+            ],
           ),
-        ],
-
-        SizedBox(height: 10,),
-
-        MyTextfield(hintText: "New password",
-          obscureText: true,
-          controller: _newPasswordController,
-          inputFocus: _newPasswFocus
-        ),
-        if(showErrNewPass) ... [
-          SizedBox(height: 3,),
-          const Text(
-            "Please enter your new password!",
-            style: TextStyle(color: Colors.red),
-          ),
-        ]
-        else if(newPassTouched && !checkPasswordConstraints(_newPasswordController.text)) ... [
-          SizedBox(height: 3,),
-          Padding(
-            padding: const EdgeInsets.only(left: 30, right: 30),
-            child: const Text(
-              "Your password must be at least 8 characters long and include special characters!",
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 12
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SizedBox(
+                height: 70,
+                child: MyButton(
+                  text: "Change password",
+                  onTap: () async {
+                    if(!showErrCurrPass && !showErrNewPass && !showErrConfirmPass && !confirmPassMismatch && !checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)){
+                      sendVerificationCode(widget.username);
+                      final result = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: widget.username,),
+                      );
+                      if(result){
+                        final res = await AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, AuthService.currentUsernameTest.value!);
+                        if(res) {
+                          _currentPasswordController.clear();
+                          _newPasswordController.clear();
+                          _confirmPasswordController.clear();
+                          setState(() {
+                            currPassTouched = false;
+                            newPassTouched = false;
+                            confirmPassTouched = false;
+                          });
+                        }
+                      }
+                    }
+                  },
+                  color: 
+                  _currentPasswordController.text.isEmpty ||
+                  _newPasswordController.text.isEmpty ||
+                  _confirmPasswordController.text.isEmpty ||
+                  _newPasswordController.text != _confirmPasswordController.text ||
+                  checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)
+                  ? const Color.fromARGB(255, 222, 222, 222)
+                  : Colors.white,
+                  showShadow: 
+                  _currentPasswordController.text.isEmpty || _newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty
+                  ? false
+                  : true,
+                ),
               ),
             ),
-          ),
+          )
         ]
-        // TODO: Check if this works
-        else if(newPassTouched && checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)) ... [
-          SizedBox(height: 3,),
-          const Text(
-            "The new password cannot be the same as the old one!",
-            style: TextStyle(color: Colors.red),
-          ),
-        ], 
-
-        SizedBox(height: 10,),
-
-        MyTextfield(hintText: "Confirm password",
-          obscureText: true,
-          controller: _confirmPasswordController,
-          inputFocus: _confirmPasswFocus
-        ),
-        if(showErrConfirmPass) ... [
-          SizedBox(height: 3,),
-          const Text(
-            "Please confirm your new password!",
-            style: TextStyle(color: Colors.red),
-          ),
-        ]
-        else if(confirmPassMismatch) ... [
-          SizedBox(height: 3,),
-          const Text(
-            "Your passwords do not match!",
-            style: TextStyle(color: Colors.red,),
-          ),
-        ],
-
-        SizedBox(height: 20,),
-
-        MyButton(text: "Change password",
-          onTap: () {
-            if(!showErrCurrPass && !showErrNewPass && !showErrConfirmPass && !confirmPassMismatch && !checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)){
-              sendVerificationCode(widget.username);
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => VeryifyDialog(userEmail: widget.email, username: widget.username,),
-              ).then((reload) {
-                if(reload == true){
-                  // refreshFiles();
-                }
-              });
-              // AuthService.updatePassword(_currentPasswordController.text, _newPasswordController.text, username);
-            }
-          },
-          color: 
-          _currentPasswordController.text.isEmpty ||
-          _newPasswordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty ||
-          _newPasswordController.text != _confirmPasswordController.text ||
-          checkPasswordDiff(_currentPasswordController.text, _newPasswordController.text)
-          ? const Color.fromARGB(255, 222, 222, 222)
-          : Colors.white,
-          showShadow: 
-          _currentPasswordController.text.isEmpty || _newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty
-          ? false
-          : true,
-        )
-      ],
+      ),
     );
   }
   

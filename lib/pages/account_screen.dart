@@ -79,15 +79,30 @@ class _UserAccountState extends State<UserAccount> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min, //  so row only takes needed space
                     children: [
-                      Text(
-                        // If for some reason the user it not logged in, default "NOT LOGGED IN"
-                        username != "NOT LOGGED IN"
-                            ? "$username"
-                            : "NOT LOGGED IN",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12
-                        ),
+                      // Text(
+                      //   // If for some reason the user it not logged in, default "NOT LOGGED IN"
+                      //   username != "NOT LOGGED IN"
+                      //       ? "$username"
+                      //       : "NOT LOGGED IN",
+                      //   style: TextStyle(
+                      //     color: Colors.grey,
+                      //     fontSize: 12
+                      //   ),
+                      // ),
+                      ValueListenableBuilder<String?>(
+                        valueListenable: AuthService.currentUsernameTest,
+                        builder: (context, username, _) {
+                          return Text(
+                            // If for some reason the user is not logged in, default "NOT LOGGED IN"
+                            (username != null && username != "NOT LOGGED IN") 
+                                ? username 
+                                : "NOT LOGGED IN",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 4),
                       const Icon(

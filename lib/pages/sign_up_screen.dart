@@ -183,6 +183,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LengthLimitingTextInputFormatter(12),
                         ],
                         inputFocus: _usernameFocus,
+                        touched: usernameTouched,
                       ),
                       if(showErrorUsername) ... [
                         SizedBox(height: 3,),
@@ -207,6 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         obscureText: false,
                         controller: _emailController,
                         inputFocus: _emailFocus,
+                        touched: emailTouched,
                       ),
                       
                       if(showErrorEmail) ...[
@@ -238,6 +240,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         obscureText: false,
                         controller: _confirmEmailController,
                         inputFocus: _confirmEmailFocus,
+                        touched: confirmEmailTouched,
                       ),
                       if(showErrorconfirmEmail) ...[
                         SizedBox(height: 3,),
@@ -262,6 +265,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         obscureText: true,
                         controller: _pwdController,
                         inputFocus: _pwdFocus,
+                        touched: passwordTouched,
                       ),
                       SizedBox(height: 3,),
                       if(showErrorPwd) ... [

@@ -108,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _usernameController,
                             autofillHints: [AutofillHints.username],
                             inputFocus: _usernameFocus,
+                            touched: usernameTouched,
                           ),
                           if(showErrorUsername) ... [
                             SizedBox(height: 3,),
@@ -125,6 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _pwdController,
                             autofillHints: [AutofillHints.password],
                             inputFocus: _pwdFocus,
+                            touched: passwordTouched,
                           ),
                           // SizedBox(height: 3,),
                           if(showErrorPwd) ... [

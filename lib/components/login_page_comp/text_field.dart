@@ -8,6 +8,7 @@ class MyTextfield extends StatelessWidget {
   final List<String>? autofillHints; // input saved password
   final List<TextInputFormatter>? inputFormatter; // can be used to limit number of words
   final FocusNode inputFocus;
+  final bool touched;
   
   const MyTextfield({
     super.key,
@@ -17,6 +18,7 @@ class MyTextfield extends StatelessWidget {
     this.autofillHints,
     this.inputFormatter,
     required this.inputFocus,
+    required this.touched
 });
 
   @override
@@ -58,7 +60,11 @@ class MyTextfield extends StatelessWidget {
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: controller.text.isEmpty ? Colors.red : Theme.of(context).colorScheme.tertiary,
+                color: 
+                controller.text.isEmpty &&
+                touched
+                ? Colors.red 
+                : Theme.of(context).colorScheme.tertiary,
               ),
               borderRadius: BorderRadius.circular(25),
             ),
