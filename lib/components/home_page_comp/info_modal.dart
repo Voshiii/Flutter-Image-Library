@@ -3,7 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 
-void showInfoModal(BuildContext context, Map<String, dynamic> data) {
+void showInfoModal(BuildContext context, Map<String, dynamic> data, bool isFile) {
+  print("THE DATA IN THE MODEL: $data");
+
+  // Check if the name contains .enc
+  String checkItemName(){
+    if(isFile) {return data["name"].substring(0, data["name"].length - 4);}
+    return data["name"];
+  }
+
   showCupertinoModalPopup(
     context: context,
     builder: (context) => Material(
@@ -40,7 +48,8 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
 
               Icon(Icons.folder, size: 150, color: Theme.of(context).colorScheme.primary),
               SizedBox(height: 5),
-              Text(data["name"], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(checkItemName(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              // Text("Name", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               SizedBox(height: 5),
 
               Align(
@@ -82,7 +91,7 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
                 )
               ),
 
-              infoList(data),
+              infoList(data, isFile),
             ],
           ),
         ),
@@ -92,14 +101,21 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data) {
 }
 
 // This handles the list items
-Widget infoList(dynamic data) {
+Widget infoList(dynamic data, bool isFile) {
   return ListView(
     shrinkWrap: true,
     padding: EdgeInsets.zero,
     children: [
-      _infoTile("Kind", "Folder"),
+      if(isFile)...[
+        _infoTile("Kind", "File"),
+      ]
+      else...[
+        _infoTile("Kind", "Folder"),
+      ],
       _infoTile("Size", _roundValue(data["sizeBytes"])),
-      _infoTile("Number of items", data["itemCount"].toString()),
+      if(!isFile)...[
+        _infoTile("Item Count", "${data["itemCount"].toString()} items"),
+      ],
       _infoTile("Created", _formatDate(data["createdAt"])),
       _infoTile("Modified", _formatDate(data["modifiedAt"])),
     ],
