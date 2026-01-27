@@ -1,0 +1,120 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:photo_album/services/upload_service.dart';
+
+class PopUpRenameItem extends StatefulWidget {
+  final String oldFolderName;
+  final String currentFolderPath;
+  final bool isFile;
+
+   const PopUpRenameItem({
+    super.key,
+    required this.oldFolderName,
+    required this.currentFolderPath,
+    required this.isFile,
+  });
+
+  @override
+  State<PopUpRenameItem> createState() => _PopUpRenameItemState();
+}
+
+class _PopUpRenameItemState extends State<PopUpRenameItem> {
+  final TextEditingController _textController = TextEditingController();
+  final UploadService _uploadService = UploadService();
+  bool _isCancelEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.isFile){
+      _textController.text = widget.oldFolderName.substring(0, widget.oldFolderName.length - 4);
+    }
+    else{
+      _textController.text = widget.oldFolderName;
+    }
+ 
+    final text = _textController.text.trim();
+    _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
+    _textController.addListener(_handleTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _handleTextChanged() {
+    setState(() {
+      final text = _textController.text.trim();
+      _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return 
+      CupertinoAlertDialog(
+      title: Text(
+        "Rename folder",
+        style: TextStyle(fontSize: 22),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            Text(
+              "Please enter new folder name for ${widget.oldFolderName.substring(0, widget.oldFolderName.length - 4)}",
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            
+            CupertinoTextField(
+              controller: _textController,
+              placeholder: "New folder name",
+              maxLines: null,
+              minLines: 1,
+              style: TextStyle(
+              color: CupertinoTheme.of(context).brightness == Brightness.dark
+                  ? CupertinoColors.white
+                  : CupertinoColors.black,
+              ),
+            )
+          ],
+        ),
+      ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: !_isCancelEnabled
+          ? null
+          : () async {
+            final bool result = await _uploadService.renameItem(widget.oldFolderName, _textController.text, widget.currentFolderPath);
+            if(!context.mounted) return;
+            if (result == false) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to rename folder!')),
+              );
+            }
+      
+            Navigator.of(context).pop(result);
+          },
+          child: Text(
+            "Ok",
+            style: _isCancelEnabled
+            ? TextStyle(color: Theme.of(context).colorScheme.primary)
+            : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
+          ),
+        ),
+        CupertinoDialogAction(
+          child: Text(
+            "Cancel",
+            style: TextStyle(color: const Color.fromARGB(255, 227, 1, 1)),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        )
+      ],
+      
+          );
+  }
+}
