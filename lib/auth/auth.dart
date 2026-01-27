@@ -70,23 +70,14 @@ class AuthService {
     return await _storage.read(key: 'activeFaceID') == "true";
   }
 
-  // // Delete all saved items
-  // static Future<void> clearTokenandUsername() async {
-  //   await _storage.delete(key: "token");
-  //   await _storage.delete(key: "username");
-  //   await _storage.delete(key: "email");
-  //   await _storage.delete(key: "activeFaceID");
-  //   currentUsername = "NOT LOGGED IN";
-  //   currentUsernameTest.value = "NOT LOGGED IN";
-  // }
-
   // logout and remove items
   static Future<void> logout() async {
     await _storage.deleteAll();
     currentUsername = "NOT LOGGED IN";
   }
 
-  Future<(int, String)> login(String username, String password, BuildContext context) async {
+  // Return res code, title and comment -> for popup 
+  Future<(int, String, String)> login(String username, String password) async {
     try {
       final res = await Api.dio.post(
         '/login',
@@ -104,46 +95,47 @@ class AuthService {
         await saveUsername(username);
         await saveEmail(email);
         await Api.setAuthToken(token);
-        return (res.statusCode ?? 200, res.data.toString());
+        return (res.statusCode ?? 200, "", "");
       }
       
-      return (res.statusCode ?? 500, res.data.toString());
+      return (res.statusCode ?? 500, "Server error", res.data.toString());
     } on DioException catch (e) {
-      print("ERROR LOGGING IN: $e");
+      print("ERROR LOGGING IN ${e.response?.statusCode}: ${e.response}");
       if (e.response != null) {
         // Server responded with non-200
-        return (e.response?.statusCode ?? 400, e.response?.data.toString() ?? "Authentication Issue");
+        return (e.response?.statusCode ?? 400, "Authentication Issue", e.response?.data.toString() ?? "Invalid username or password!");
       } else {
         // No response (e.g. network issue)
-        // Res code "500" will automatically show "Server error!" "Please try again later!"
-        return (500, "");
+        return (500, "Server error", "Please try again later!");
       }
     }
 
   }
 
-  Future<void> register(String email, String password, String username) async {
+  Future<(int, String, String)> register(String email, String password, String username) async {
     try {
-      await Api.dio.post(
+      final res = await Api.dio.post(
         '/register',
         data: {
         'email': email,
         'password': password,
         'username': username
       });
-      // Handle response and save information
-      // if (res.statusCode == 200) {
-      //   final token = res.data['token'];
-      //   await saveToken(token);
-      //   await saveUsername(username);
-      //   await saveEmail(email);
-      //   await Api.setAuthToken(token);
 
-      //   // if(!context.mounted) return;
-      //   // pushToHomeScreen(context, "");
-      // }
-    } catch (e) {
-      print("ERROR REGISTERING: $e");
+      if(res.statusCode == 200){
+        return (res.statusCode!, "", "");
+      }
+      return (500, "Server error", "Please try again later!");
+
+    } on DioException catch (e) {
+      print("ERROR LOGGING IN ${e.response?.statusCode}: ${e.response}");
+      if (e.response != null) {
+        // Server responded with non-200
+        return (e.response?.statusCode ?? 400, "Registering Issue", e.response?.data.toString() ?? "Something went wrong trying to register!");
+      } else {
+        // No response (e.g. network issue)
+        return (500, "Server error", "Please try again later!");
+      }
     }
     
   }

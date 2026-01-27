@@ -79,16 +79,6 @@ class _UserAccountState extends State<UserAccount> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min, //  so row only takes needed space
                     children: [
-                      // Text(
-                      //   // If for some reason the user it not logged in, default "NOT LOGGED IN"
-                      //   username != "NOT LOGGED IN"
-                      //       ? "$username"
-                      //       : "NOT LOGGED IN",
-                      //   style: TextStyle(
-                      //     color: Colors.grey,
-                      //     fontSize: 12
-                      //   ),
-                      // ),
                       ValueListenableBuilder<String?>(
                         valueListenable: AuthService.currentUsernameTest,
                         builder: (context, username, _) {

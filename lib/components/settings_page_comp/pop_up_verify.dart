@@ -19,6 +19,7 @@ class VeryifyDialog extends StatefulWidget {
 class _VeryifyDialogState extends State<VeryifyDialog> {
   int secondsLeft = 0;
   Timer? _countdownTimer;
+  bool wrongCode = false;
 
   void startCountdown() {
     print("Starting timer");
@@ -105,13 +106,26 @@ class _VeryifyDialogState extends State<VeryifyDialog> {
                 ),
 
                 SizedBox(height: 20,),
-            
+
+                // ! TODO: SHOW ERROR WHEN INCORRECT CODE
                 VerificationCodeField(
                   codeDigit: CodeDigit.four,
+                  onChanged: (value) {
+                    setState(() {
+                      wrongCode = false;
+                    });
+                  },
                   onSubmit: (value) async {
                     final res = await verifyCode(value, widget.username);
-                    if(!context.mounted) return;
-                    Navigator.of(context).pop(res);
+                    if(!res){
+                      setState(() {
+                        wrongCode = true;
+                      });
+                    }
+                    else{
+                      if(!context.mounted) return;
+                      Navigator.of(context).pop(res);
+                    }
                   },
                   enabled: true,
                   filled: true,
@@ -130,6 +144,16 @@ class _VeryifyDialogState extends State<VeryifyDialog> {
                     fontWeight: FontWeight.bold
                   ),
                 ),
+
+                if(wrongCode)...[
+                  SizedBox(height: 10,),
+                  Text(
+                    "Wrong code!",
+                    style: TextStyle(
+                      color: Colors.red
+                    ),
+                  )
+                ],
 
                 SizedBox(height: 30,),
 
