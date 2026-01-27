@@ -181,14 +181,15 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
                                 _isLoading = true;
                               });
                             });
+
+                            _countdownTimer = Timer(const Duration(seconds: 2), () {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            });
                           }
                         }
-                        _countdownTimer = Timer(const Duration(seconds: 2), () {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          
-                        });
+                        
 
                       }
                     },
@@ -211,7 +212,7 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
         ),
       ),
 
-        // Loading overlay
+      // Loading overlay
       if(_isLoading)
         Positioned.fill(
           child: Container(

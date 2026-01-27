@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/verification.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
@@ -32,6 +35,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool currPassTouched = false;
   bool newPassTouched = false;
   bool confirmPassTouched = false;
+  
+  Timer? _countdownTimer;
+
+  bool _isLoading = false;
 
   // The new password should not be the old password
   bool checkPasswordDiff(String newPass, String currPass){
@@ -94,6 +101,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _currentPasswFocus.dispose();
     _newPasswFocus.dispose();
     _confirmPasswFocus.dispose();
+
+    _countdownTimer?.cancel();
 
     super.dispose();
   }
@@ -214,7 +223,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             currPassTouched = false;
                             newPassTouched = false;
                             confirmPassTouched = false;
+                            _isLoading = true;
                           });
+
+                          _countdownTimer = Timer(const Duration(seconds: 2), () {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        });
                         }
                       }
                     }
@@ -234,7 +250,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
               ),
             ),
-          )
+          ),
+
+          // Loading overlay
+      if(_isLoading)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black54, // semi-transparent dark background
+            child: Center(
+              child: LoadingAnimationWidget.waveDots(
+                color: Colors.white,
+                size: 150,
+              ),
+            ),
+          ),
+        ),
         ]
       ),
     );

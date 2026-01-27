@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading = false;
 
-  // ! TODO FIX THIS: CHECK change_pass_screen.dart
   @override
   void initState() {
     super.initState();
@@ -147,45 +146,21 @@ class _LoginPageState extends State<LoginPage> {
         
                       try {
                         // success
-                        final res = await _authService.login(_usernameController.text, _pwdController.text, context);
+                        final res = await _authService.login(_usernameController.text, _pwdController.text);
                         if(res.$1 == 200 && mounted){
+                          if (mounted) setState(() => _isLoading = false);
                           if(!context.mounted) return;
                           pushToHomeScreen(context, "");
                         }
-                        // Not found
-                        else if (res.$1 == 404 && mounted){
-                          if (!context.mounted) return;
-                          showDialog(
-                            context: context,
-                            // builder: (BuildContext context) => failedLoginDialog(context),
-                            builder: (BuildContext context) => errorDialog(
-                              context,
-                              "Invalid Credentials",
-                              "Username or Password Incorrect!"
-                            ),
-                          );
-                        }
-                        // Not verified
-                        else if (res.$1 == 400 && mounted){
-                          if (!context.mounted) return;
-                          showDialog(
-                            context: context,
-                            // builder: (BuildContext context) => failedLoginDialog(context),
-                            builder: (BuildContext context) => errorDialog(
-                              context,
-                              "Error",
-                              res.$2
-                            ),
-                          );
-                        }
                         else{
-                          if (!context.mounted) return;
+                          if(!context.mounted) return;
                           showDialog(
                             context: context,
+                            // builder: (BuildContext context) => failedLoginDialog(context),
                             builder: (BuildContext context) => errorDialog(
                               context,
-                              "Server Error",
-                              "Please try again later!"
+                              res.$2,
+                              res.$3
                             ),
                           );
                         }

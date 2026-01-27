@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/blocked_email.dart';
+import 'package:photo_album/components/error_dialog.dart';
 import 'package:photo_album/components/login_page_comp/my_button.dart';
 import 'package:photo_album/components/login_page_comp/text_field.dart';
 import 'package:photo_album/pages/login_screen.dart';
@@ -294,22 +295,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 
                     MyButton(
                       text: "Sign up",
-                      onTap: () => {
-                        if(
-                          checkFormIsValid()
-                          ){
-                          _authService.register(
+                      onTap: () async {
+                        if(checkFormIsValid()) {
+                          final res = await _authService.register(
                             _emailController.text,
                             _pwdController.text,
                             _usernameController.text,
-                          ),
+                          );
                           // Push back to login. User must first verify their email before they can log in
                                 
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => signUpSuccess(),
-                          ),
-                        },
+                          if(res.$1 == 200){
+                            if(!context.mounted) return;
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => signUpSuccess(),
+                            );
+                          }
+                          else{
+                            if(!context.mounted) return;
+                            showDialog(
+                              context: context,
+                              // builder: (BuildContext context) => failedLoginDialog(context),
+                              builder: (BuildContext context) => errorDialog(
+                                context,
+                                res.$2,
+                                res.$3
+                              ),
+                            );
+                          } 
+                        }
                       },
                       color:
                       //  _emailController.text.isEmpty || _pwdController.text.isEmpty || _usernameController.text.isEmpty
