@@ -1,15 +1,15 @@
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_album/components/home_page_comp/data_button.dart';
-import 'package:photo_album/components/home_page_comp/folder_on_hold_popup.dart';
+import 'package:photo_album/components/home_page_comp/file_on_hold_popup.dart';
 import 'package:photo_album/pages/home_screen.dart';
+import 'package:photo_album/pages/image_viewer_screen.dart';
 import 'package:photo_album/services/fetch_service.dart';
 
 class FilesSearchAndGrid extends StatefulWidget {
   final List<dynamic> allFiles;
-  final Map<String, dynamic> fileDataMap;
+  final Map<String, dynamic> fileDataMap; // stores the { [name]: { [fileInfo] } }
   final String currentFolderPath;
   final Future<void> Function()? refreshFiles;
 
@@ -25,9 +25,15 @@ class FilesSearchAndGrid extends StatefulWidget {
   FilesSearchAndGridState createState() => FilesSearchAndGridState();
 }
 
-class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
+class FilesSearchAndGridState extends State<FilesSearchAndGrid> with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   late List<dynamic> _filteredFiles;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  int test = 0;
 
   // Map<String, dynamic> cachedData = {};
 
@@ -40,6 +46,7 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
 
   @override
   void didUpdateWidget(covariant FilesSearchAndGrid oldWidget) {
+    print("DID UPDATE WIDGET!");
     super.didUpdateWidget(oldWidget);
 
     // If the file list changed, refresh filtered list
@@ -62,6 +69,13 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
     if (fileName.endsWith('.enc')) { // Files are encrypted and it still has the extention
       newFileName = fileName.substring(0, fileName.length - 4); // remove ".enc"
     }
+
+    // The client only gets a thumbnail from the server if it's a video
+    // The returned filename with me "thumb_fileName.mov.jpg.enc"
+    // Remove the ".enc", ".jpg" and the "thumb_"
+    if(newFileName.startsWith("thumb_")){
+      newFileName = newFileName.substring(6, newFileName.length - 4);
+    }
     if (newFileName.length > 12){
       return "${newFileName.substring(0, 6)}...${newFileName.substring(newFileName.length - 5)}";
     }
@@ -69,11 +83,12 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
   }
 
   void _onSearchChanged() {
+    print("ON SEARCH ACTIVATED");
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredFiles = widget.allFiles
-          .where((file) => file.toLowerCase().contains(query))
-          .toList();
+        .where((file) => file.toLowerCase().contains(query))
+        .toList();
     });
   }
 
@@ -92,7 +107,8 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
     }
   }
 
-  Stream<Map<String, dynamic>> getNewData(String folderName){
+  // When going to new folder, request the data
+  Stream<Map<String, dynamic>> getFolderNewData(String folderName){
     final FetchService fetchService = FetchService();
     final localNameController = StreamController<Map<String, dynamic>>();
 
@@ -109,8 +125,16 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
 
   @override
   Widget build(BuildContext context) {
+    print("THE MAIN WINDOW UPDATED!");
+    print(test);
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        // Only unfocus if something is focused
+        if (_searchFocusNode.hasFocus) {
+          _searchFocusNode.unfocus();
+        }
+      },
       child: Column(
         children: [
           searchBarWidget(),
@@ -121,10 +145,12 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
   }
 
   Widget searchBarWidget(){
+    print("Resetting search?");
     return Padding(
       padding: const EdgeInsets.all(12),
       child: CupertinoSearchTextField(
         controller: _searchController,
+        focusNode: _searchFocusNode,
         placeholder: 'Search files...',
         prefixIcon: Icon(Icons.search),
         suffixIcon: Icon(Icons.clear),
@@ -156,10 +182,11 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
         final parsedFileName = getParsedFileName(fileName);
         final isActualFile = isFile(fileName);
 
+
         // The button which shows the item
         // -> Each item, folder, image, file, etc.
         // Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile, cachedData);
-        Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile);
+        Widget myBuildDataButton = buildDataButton(fileName, parsedFileName, isActualFile, index);
 
         final layerLink = LayerLink();
         final key = GlobalKey();
@@ -179,7 +206,7 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
               size,
               overlayEntry,
               widget.refreshFiles,
-              widget.fileDataMap[fileName],
+              widget.fileDataMap[fileName], // data
               parsedFileName,
               widget.currentFolderPath,
               fileName,
@@ -200,25 +227,36 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
 
   // This is the actual button seen
   // Widget buildDataButton(fileName, parsedFileName, isActualFile, cachedData) {
-  Widget buildDataButton(fileName, parsedFileName, isActualFile) {
+  Widget buildDataButton(fileName, parsedFileName, isActualFile, index) {
     return DataButton(
       key: ValueKey(fileName), // keeps state between searches
-      fullFileName: fileName,
-      parsedFileName: parsedFileName,
+      fullFileName: fileName, // full name of the file
+      parsedFileName: parsedFileName, // short version e.g "longName...g.png"
       onTap: () {
 
         if (isActualFile){
           // TODO If it is a file, open it
           print("IsFile");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              // builder: (context) => MyTestInterface(),
+              builder: (context) => ImageViewerScreen(files: _filteredFiles, folderPath: widget.currentFolderPath, initialIndex: index,)
+            ),
+          );
         }
         else {
           // Make the new folderPath: username -> username/folderName
           final newCurrentFolderPathName = "${widget.currentFolderPath}/$fileName";
-          final fileStream = getNewData(newCurrentFolderPathName);
+          final fileStream = getFolderNewData(newCurrentFolderPathName);
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeScreen(fileStream: fileStream, currentFolderPath: newCurrentFolderPathName),
+              builder: (context) => HomeScreen(
+                // key: ValueKey(widget.currentFolderPath),
+                fileStream: fileStream,
+                currentFolderPath: newCurrentFolderPathName
+              ),
             ),
           );
         }
@@ -229,4 +267,12 @@ class FilesSearchAndGridState extends State<FilesSearchAndGrid> {
       // cachedData: cachedData,
     );
   }
+
+  // @override
+  // void dispose() {
+  //   _searchController.dispose();
+  //   _searchFocusNode.dispose();
+  //   super.dispose();
+  // }
+
 }
