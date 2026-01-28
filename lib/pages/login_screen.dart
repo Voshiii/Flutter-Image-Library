@@ -59,8 +59,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    // void listener() => setState(() {});
-    // _usernameController.addListener(listener);
 
     _usernameFocus.addListener(() async {
       if (!_usernameFocus.hasFocus) {
@@ -81,6 +79,8 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
 
+    _usernameController.addListener(() {setState(() {});});
+
     // _pwdController.addListener(listener);
 
     _pwdController.addListener(() {
@@ -97,13 +97,13 @@ class _LoginPageState extends State<LoginPage> {
         }
     });
     
-    _usernameFocus.addListener(() {if (!_usernameFocus.hasFocus) {setState(() => usernameTouched = true);}});
-    
     _pwdFocus.addListener(() {
       if (!_pwdFocus.hasFocus) {
         setState(() => passwordTouched = true);
       }
     });
+
+    _pwdController.addListener((){setState(() {});});
     
     _emailFocus.addListener(() async {
       if (!_emailFocus.hasFocus) {
@@ -129,8 +129,16 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     });
+
+    _emailController.addListener((){setState(() {});});
+
+    _confirmEmailController.addListener(() {setState(() {});});
     
-    _confirmEmailFocus.addListener(() {if (!_confirmEmailFocus.hasFocus) {setState(() => confirmEmailTouched = true);}});
+    _confirmEmailFocus.addListener(() {
+      if (!_confirmEmailFocus.hasFocus) {
+        setState(() => confirmEmailTouched = true);
+      }      
+    });
   }
 
   @override
@@ -165,8 +173,6 @@ class _LoginPageState extends State<LoginPage> {
     } else if (showPasswordConstraintError){
       return false;
     }
-
-    print("returning true");
 
     return true;
   }
@@ -500,6 +506,7 @@ class _LoginPageState extends State<LoginPage> {
         
                   SizedBox(height: 10,),
         
+                  // Button to change from login -> signup -> login
                   MyButton(
                     text: !isLogin ? "Login" : "Sign Up",
                     reverseAnimation: true,
