@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       isLogin 
                       ? "Please enter your username and password:" 
-                      : "Welcome to Voshi's cloud",
+                      : "Welcome to Voshi's cloud!",
                       key: ValueKey(isLogin),
                       style: const TextStyle(
                         fontSize: 15,

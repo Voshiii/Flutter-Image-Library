@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -186,217 +187,221 @@ class FileSelectorDialogState extends State<FileSelectorDialog> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_isUploading,
-      child: AlertDialog(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Select a file"),
-            IconButton(
-              onPressed: () => {
-                if(widget.fromGallery){
-                  _pickFromGallery()
-                }
-                else{
-                  _pickFromFiles()
-                }
-              },
-              icon: Icon(
-                Icons.add_circle_outline,
-                color: Colors.blue,
-                size: 30,
-              ),
-            )
-          ],
-        ),
-        content: 
-        SizedBox(
-          width: double.maxFinite,
-          child: 
-            _selectedFiles.isEmpty
-              ? Container(
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue,
-                  borderRadius: BorderRadius.circular(20)
-                ),
-                // mainAxisSize: MainAxisSize.min,
-                child: 
-                TextButton(onPressed: () => {
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(130, 5, 55, 69),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Select a file"),
+              IconButton(
+                onPressed: () => {
                   if(widget.fromGallery){
                     _pickFromGallery()
                   }
                   else{
                     _pickFromFiles()
                   }
-                  
                 },
-                child: 
-                widget.fromGallery
-                ? Text(
-                    "Open gallery",
-                    style: TextStyle(color: Colors.black),
-                  )
-                : Text(
-                  "Open files",
-                  style: TextStyle(color: Colors.black),
-                )
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.blue,
+                  size: 30,
                 ),
               )
-              : ListView.separated(
-                shrinkWrap: true,
-                itemCount: _selectedFiles.length,
-                separatorBuilder: (context, index) => SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final fileName = filePaths[index].split('/').last;
-
-                  return Column(
-                    children: [
-                      ListTile(
-                        leading: SizedBox(
-                          width: 80,
-                          height: 80,
-                          child: 
-                          Center(child: getFileWidget(index)),
-                          
-                        ),
-                      
-                        title: Text(
-                          getShortenedName(fileName),
-                          style: TextStyle(
-                            fontSize: 12
-                          ),
-                        ),
-                        
-                        trailing: 
-                        _isUploading
-                          ? SizedBox()
-                          : IconButton(
-                          onPressed: () => {
-                            setState(() {
-                              _selectedFiles.removeAt(index);
-                              filePaths.removeAt(index);
-                            })
-                          },
-                          icon: Icon(Icons.delete),
-                          color: Colors.red,
-                        )  
-                        
-                      ),
-
-                      if(_isUploading)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: SizedBox(
-                            height: 5,
-                            child: LinearProgressIndicator(value: _uploadProgresses[filePaths[index]], color: Colors.blue,),
-                          ),
-                        )
-                    
-                    ],
-                  );
-                },
-              )
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: !_isUploading ? _removeImages : uploadService.cancelUpload,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedFiles.isNotEmpty
-                  ? const Color.fromARGB(190, 244, 67, 54)
-                  : const Color.fromARGB(255, 138, 138, 138),
-                ),
-                child: !_isUploading
-                  ? Text("Clear", style: TextStyle(color: Colors.black),)
-                  : Text("Cancel", style: TextStyle(color: Colors.black),)
-              ),
-      
-              SizedBox(width: 10,),
-      
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedFiles.isNotEmpty && !_isUploading
-                  ? const Color.fromARGB(195, 18, 158, 0)
-                  : const Color.fromARGB(255, 138, 138, 138),
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                ),
-                onPressed: () async {
-                  if (_selectedFiles.isNotEmpty && !_isUploading) {
-                    setState(() {
-                      _isUploading = true;
-                    });
-
-                    final uploadFutures = List.generate(_selectedFiles.length, (i) {
-                      final file = _selectedFiles[i];
-                      final filePath = filePaths[i];
-                      setState(() {
-                        _uploadProgresses[filePath] = 0.0;
-                      });
-
-                      return uploadService.uploadFile(
-                        file: file,
-                        folderPath: widget.folderPath,
-                        imageName: filePath,
-                        onProgress: (progress) {
-                          setState(() {
-                            _uploadProgresses[filePath] = progress;
-                          });
-                        },
-                      );
-                    });
-
-
-                    try {
-                      final result = await Future.wait(uploadFutures);
-                      bool success;
-                      if(result.contains(false)){
-                        success = false;
-                      }
-                      else{
-                        success = true;
-                      }
-      
-                      setState(() {
-                        _isUploading = false;
-                      });
-                      if(!context.mounted) return;
-                      success
-                      ? ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Image uploaded successfully!')),
-                      )
-                      : ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to upload!')),
-                      );
-
-                      setState(() {
-                        _isUploading = false;
-                      });
-
-                      _notiService.fileUploaded(success);
-      
-                      Navigator.of(context).pop(success);
-                    }
-                    catch(e){
-                      // Handle any errors that may occur during upload
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Upload failed: $e')),
-                      );
-                    }
-                  }
-                  else{
-                    // Handle case where no image is selected
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('No file selected!')),
-                    );
-                  }
-              
-                },
-                child: Text("Upload", style: TextStyle(color: Colors.black)),
-              ),
             ],
           ),
-        ],
+          content: 
+          SizedBox(
+            width: double.maxFinite,
+            child: 
+              _selectedFiles.isEmpty
+                ? Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightBlue,
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  // mainAxisSize: MainAxisSize.min,
+                  child: 
+                  TextButton(onPressed: () => {
+                    if(widget.fromGallery){
+                      _pickFromGallery()
+                    }
+                    else{
+                      _pickFromFiles()
+                    }
+                    
+                  },
+                  child: 
+                  widget.fromGallery
+                  ? Text(
+                      "Open gallery",
+                      style: TextStyle(color: Colors.black),
+                    )
+                  : Text(
+                    "Open files",
+                    style: TextStyle(color: Colors.black),
+                  )
+                  ),
+                )
+                : ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _selectedFiles.length,
+                  separatorBuilder: (context, index) => SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final fileName = filePaths[index].split('/').last;
+        
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: 
+                            Center(child: getFileWidget(index)),
+                            
+                          ),
+                        
+                          title: Text(
+                            getShortenedName(fileName),
+                            style: TextStyle(
+                              fontSize: 12
+                            ),
+                          ),
+                          
+                          trailing: 
+                          _isUploading
+                            ? SizedBox()
+                            : IconButton(
+                            onPressed: () => {
+                              setState(() {
+                                _selectedFiles.removeAt(index);
+                                filePaths.removeAt(index);
+                              })
+                            },
+                            icon: Icon(Icons.delete),
+                            color: Colors.red,
+                          )  
+                          
+                        ),
+        
+                        if(_isUploading)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: SizedBox(
+                              height: 5,
+                              child: LinearProgressIndicator(value: _uploadProgresses[filePaths[index]], color: Colors.blue,),
+                            ),
+                          )
+                      
+                      ],
+                    );
+                  },
+                )
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: !_isUploading ? _removeImages : uploadService.cancelUpload,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedFiles.isNotEmpty
+                    ? const Color.fromARGB(190, 244, 67, 54)
+                    : const Color.fromARGB(255, 138, 138, 138),
+                  ),
+                  child: !_isUploading
+                    ? Text("Clear", style: TextStyle(color: Colors.black),)
+                    : Text("Cancel", style: TextStyle(color: Colors.black),)
+                ),
+        
+                SizedBox(width: 10,),
+        
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedFiles.isNotEmpty && !_isUploading
+                    ? const Color.fromARGB(195, 18, 158, 0)
+                    : const Color.fromARGB(255, 138, 138, 138),
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  ),
+                  onPressed: () async {
+                    if (_selectedFiles.isNotEmpty && !_isUploading) {
+                      setState(() {
+                        _isUploading = true;
+                      });
+        
+                      final uploadFutures = List.generate(_selectedFiles.length, (i) {
+                        final file = _selectedFiles[i];
+                        final filePath = filePaths[i];
+                        setState(() {
+                          _uploadProgresses[filePath] = 0.0;
+                        });
+        
+                        return uploadService.uploadFile(
+                          file: file,
+                          folderPath: widget.folderPath,
+                          imageName: filePath,
+                          onProgress: (progress) {
+                            setState(() {
+                              _uploadProgresses[filePath] = progress;
+                            });
+                          },
+                        );
+                      });
+        
+        
+                      try {
+                        final result = await Future.wait(uploadFutures);
+                        bool success;
+                        if(result.contains(false)){
+                          success = false;
+                        }
+                        else{
+                          success = true;
+                        }
+        
+                        setState(() {
+                          _isUploading = false;
+                        });
+                        if(!context.mounted) return;
+                        success
+                        ? ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Image uploaded successfully!')),
+                        )
+                        : ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to upload!')),
+                        );
+        
+                        setState(() {
+                          _isUploading = false;
+                        });
+        
+                        _notiService.fileUploaded(success);
+        
+                        Navigator.of(context).pop(success);
+                      }
+                      catch(e){
+                        // Handle any errors that may occur during upload
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Upload failed: $e')),
+                        );
+                      }
+                    }
+                    else{
+                      // Handle case where no image is selected
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('No file selected!')),
+                      );
+                    }
+                
+                  },
+                  child: Text("Upload", style: TextStyle(color: Colors.black)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

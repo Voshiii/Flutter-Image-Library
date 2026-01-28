@@ -4,8 +4,6 @@ import 'package:intl/intl.dart';
 
 
 void showInfoModal(BuildContext context, Map<String, dynamic> data, bool isFile) {
-  print("THE DATA IN THE MODEL: $data");
-
   // Check if the name contains .enc
   String checkItemName(){
     if(isFile) {return data["name"].substring(0, data["name"].length - 4);}
@@ -46,7 +44,15 @@ void showInfoModal(BuildContext context, Map<String, dynamic> data, bool isFile)
                 )
               ),
 
-              Icon(Icons.folder, size: 150, color: Theme.of(context).colorScheme.primary),
+              // (Icons.folder, size: 150, color: Theme.of(context).colorScheme.primary);
+
+              if(!isFile)...[
+                Icon(Icons.folder, size: 150, color: Theme.of(context).colorScheme.primary)
+              ]
+              else...[
+                // TODO CHANGE FROM TEMP ICON TO SPECIFIC TYPE
+                Icon(Icons.file_present, size: 140, color: Theme.of(context).colorScheme.primary),
+              ],
               SizedBox(height: 5),
               Text(checkItemName(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
               // Text("Name", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),

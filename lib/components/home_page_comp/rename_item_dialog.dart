@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:photo_album/services/upload_service.dart';
 
 class PopUpRenameItem extends StatefulWidget {
-  final String oldFolderName;
-  final String currentFolderPath;
+  final String oldFileName;
+  final String currentFilePath;
   final bool isFile;
 
    const PopUpRenameItem({
     super.key,
-    required this.oldFolderName,
-    required this.currentFolderPath,
+    required this.oldFileName,
+    required this.currentFilePath,
     required this.isFile,
   });
 
@@ -21,20 +21,20 @@ class PopUpRenameItem extends StatefulWidget {
 class _PopUpRenameItemState extends State<PopUpRenameItem> {
   final TextEditingController _textController = TextEditingController();
   final UploadService _uploadService = UploadService();
-  bool _isCancelEnabled = false;
+  bool _isOkEnabled = true;
 
   @override
   void initState() {
     super.initState();
     if(widget.isFile){
-      _textController.text = widget.oldFolderName.substring(0, widget.oldFolderName.length - 4);
+      _textController.text = widget.oldFileName.substring(0, widget.oldFileName.length - 8);
     }
     else{
-      _textController.text = widget.oldFolderName;
+      _textController.text = widget.oldFileName;
     }
  
     final text = _textController.text.trim();
-    _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
+    _isOkEnabled = !(text.isEmpty || text == widget.oldFileName);
     _textController.addListener(_handleTextChanged);
   }
 
@@ -47,7 +47,13 @@ class _PopUpRenameItemState extends State<PopUpRenameItem> {
   void _handleTextChanged() {
     setState(() {
       final text = _textController.text.trim();
-      _isCancelEnabled = !(text.isEmpty || text == widget.oldFolderName);
+      if(widget.isFile){
+        // Remove .enc and ext
+        _isOkEnabled = !(text.isEmpty || text == widget.oldFileName.substring(0, widget.oldFileName.length - 8));
+      }
+      else{
+        _isOkEnabled = !(text.isEmpty || text == widget.oldFileName);
+      }
     });
   }
 
@@ -63,7 +69,7 @@ class _PopUpRenameItemState extends State<PopUpRenameItem> {
         child: Column(
           children: [
             Text(
-              "Please enter new folder name for ${widget.oldFolderName.substring(0, widget.oldFolderName.length - 4)}",
+              "Please enter new folder name for ${widget.oldFileName.substring(0, widget.oldFileName.length - 4)}",
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
@@ -84,10 +90,10 @@ class _PopUpRenameItemState extends State<PopUpRenameItem> {
       ),
       actions: [
         CupertinoDialogAction(
-          onPressed: !_isCancelEnabled
+          onPressed: !_isOkEnabled
           ? null
           : () async {
-            final bool result = await _uploadService.renameItem(widget.oldFolderName, _textController.text, widget.currentFolderPath);
+            final bool result = await _uploadService.renameItem(widget.oldFileName, _textController.text, widget.currentFilePath);
             if(!context.mounted) return;
             if (result == false) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -99,9 +105,13 @@ class _PopUpRenameItemState extends State<PopUpRenameItem> {
           },
           child: Text(
             "Ok",
-            style: _isCancelEnabled
-            ? TextStyle(color: Theme.of(context).colorScheme.primary)
-            : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
+            style: widget.isFile
+            ? !(_textController.text.isEmpty || _textController.text == widget.oldFileName.substring(0, widget.oldFileName.length - 8))
+              ? TextStyle(color: Theme.of(context).colorScheme.primary)
+              : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
+            : _isOkEnabled && _textController.text != widget.oldFileName
+              ? TextStyle(color: Theme.of(context).colorScheme.primary)
+              : TextStyle(color: const Color.fromARGB(255, 138, 138, 138))
           ),
         ),
         CupertinoDialogAction(
