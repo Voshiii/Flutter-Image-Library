@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_album/auth/auth.dart';
 import 'package:photo_album/auth/blocked_email.dart';
@@ -58,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    void listener() => setState(() {});
+    // void listener() => setState(() {});
     // _usernameController.addListener(listener);
 
     _usernameFocus.addListener(() async {
@@ -101,17 +102,6 @@ class _LoginPageState extends State<LoginPage> {
     _pwdFocus.addListener(() {
       if (!_pwdFocus.hasFocus) {
         setState(() => passwordTouched = true);
-        // if(!isLogin){
-        //   final res = checkPasswordConstraints(_pwdController.text);
-        //   if(!res){
-        //     setState(() {
-        //       passwordConstraintError = true;
-        //     });
-        //   }
-        //   else{
-        //     passwordConstraintError = false;
-        //   }
-        // }
       }
     });
     
@@ -183,11 +173,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final showErrorUsername = usernameTouched && _usernameController.text.isEmpty;
-    final showErrorPwd = passwordTouched && _pwdController.text.isEmpty;
+    final bool showErrorUsername = usernameTouched && _usernameController.text.isEmpty;
+    final bool showErrorPwd = passwordTouched && _pwdController.text.isEmpty;
 
-    final showErrorEmail = emailTouched && _emailController.text.isEmpty;
-    final showErrorconfirmEmail =
+    final bool showErrorEmail = emailTouched && _emailController.text.isEmpty;
+    final bool showErrorconfirmEmail =
         confirmEmailTouched && _confirmEmailController.text.isEmpty;
 
     return Stack(
@@ -218,14 +208,33 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 60,
                     )
                   ),
-        
-                  Text(
-                    "Please enter your username and password:",
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold
+
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 1),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Text(
+                      isLogin 
+                      ? "Please enter your username and password:" 
+                      : "Welcome to Voshi's cloud",
+                      key: ValueKey(isLogin),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+
             
                   SizedBox(height: 20,),
             
@@ -239,6 +248,9 @@ class _LoginPageState extends State<LoginPage> {
                           autofillHints: isLogin ? [AutofillHints.username] : [],
                           inputFocus: _usernameFocus,
                           touched: usernameTouched,
+                          inputFormatter: [
+                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                          ],
                         ),
                         if(showErrorUsername) ... [
                           SizedBox(height: 3,),
@@ -266,6 +278,9 @@ class _LoginPageState extends State<LoginPage> {
                           autofillHints: isLogin ? [AutofillHints.password] : [],
                           inputFocus: _pwdFocus,
                           touched: passwordTouched,
+                          inputFormatter: [
+                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                          ],
                         ),
                         // SizedBox(height: 3,),
                         if(showErrorPwd) ... [
@@ -302,6 +317,9 @@ class _LoginPageState extends State<LoginPage> {
                                 controller: _emailController,
                                 inputFocus: _emailFocus,
                                 touched: emailTouched,
+                                inputFormatter: [
+                                  FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                                ],
                               ),
 
                             if(showErrorEmail) ...[
@@ -343,6 +361,9 @@ class _LoginPageState extends State<LoginPage> {
                                 controller: _confirmEmailController,
                                 inputFocus: _confirmEmailFocus,
                                 touched: confirmEmailTouched,
+                                inputFormatter: [
+                                  FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                                ],
                               ),
                             
                             if(showErrorconfirmEmail) ...[
